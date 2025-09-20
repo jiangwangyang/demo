@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.controller;
+package com.github.jiangwangyang.demo.common;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
