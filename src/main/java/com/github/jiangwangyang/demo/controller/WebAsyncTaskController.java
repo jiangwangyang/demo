@@ -21,8 +21,7 @@ public class WebAsyncTaskController {
     }
 
     /**
-     * 需要设置onTimeout回调方法
-     * 也可以在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
+     * 在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
      * 项目启动第一次请求超时大概率无法正常返回数据
      */
     @GetMapping("/webAsyncTask/timeout")
@@ -34,6 +33,26 @@ public class WebAsyncTaskController {
             }
             return Map.of("data", "webAsyncTask超时");
         });
+    }
+
+    /**
+     * 设置onTimeout回调方法处理超时
+     * 项目启动第一次请求超时大概率无法正常返回数据
+     */
+    @GetMapping("/webAsyncTask/onTimeout")
+    public WebAsyncTask<Map<String, String>> webAsyncTaskOnTimeout() {
+        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(1000, () -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ignored) {
+            }
+            return Map.of("data", "webAsyncTask超时");
+        });
+        webAsyncTask.onTimeout(() -> {
+            log.warn("webAsyncTask超时");
+            return Map.of("timeout", "webAsyncTask超时");
+        });
+        return webAsyncTask;
     }
 
     /**

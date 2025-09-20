@@ -12,7 +12,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 在不使用onTimeout的情况下无法正确测试超时！
+ * 无法正确测试超时！
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebAsyncTaskControllerTest {
