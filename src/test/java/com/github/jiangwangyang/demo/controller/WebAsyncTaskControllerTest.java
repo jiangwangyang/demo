@@ -60,4 +60,14 @@ public class WebAsyncTaskControllerTest {
                 .block();
     }
 
+    @Test
+    void testWebAsyncTaskBug() {
+        client.get()
+                .uri("/webAsyncTask/bug")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("bug", "webAsyncTask超时")))
+                .block();
+    }
+
 }

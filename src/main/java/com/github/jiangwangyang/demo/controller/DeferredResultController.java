@@ -60,6 +60,34 @@ public class DeferredResultController {
         return deferredResult;
     }
 
+    /**
+     * 超时bug示例
+     * 超时回调被执行，但返回大概率是未超时的结果
+     */
+    @GetMapping("/deferred/bug")
+    public DeferredResult<Map<String, String>> deferredResultBug() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+            }
+            deferredResult.setResult(Map.of("bug", "deferred超时"));
+        });
+        deferredResult.onTimeout(() -> {
+            thread.interrupt();
+            log.warn("deferred超时");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+            deferredResult.setResult(Map.of("timeout", "deferred超时"));
+        });
+        thread.start();
+        return deferredResult;
+    }
+
     @GetMapping("/deferred/terminate")
     public DeferredResult<Map<String, String>> deferredResultTerminate() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);

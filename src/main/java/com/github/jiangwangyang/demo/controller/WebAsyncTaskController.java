@@ -68,4 +68,26 @@ public class WebAsyncTaskController {
         return webAsyncTask;
     }
 
+    /**
+     * 超时bug示例
+     * 超时回调被执行，但返回大概率是未超时的结果
+     */
+    @GetMapping("/webAsyncTask/bug")
+    public WebAsyncTask<Map<String, String>> webAsyncTaskBug() {
+        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+            }
+            return Map.of("bug", "webAsyncTask超时");
+        });
+        webAsyncTask.onTimeout(() -> {
+            log.warn("webAsyncTask超时");
+            Thread.sleep(100);
+            return Map.of("timeout", "webAsyncTask超时");
+        });
+        return webAsyncTask;
+    }
+
 }

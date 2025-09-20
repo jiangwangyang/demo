@@ -50,4 +50,14 @@ public class DeferredResultControllerTest {
                 .block();
     }
 
+    @Test
+    void testDeferredBug() {
+        client.get()
+                .uri("/deferred/bug")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("bug", "deferred超时")))
+                .block();
+    }
+
 }

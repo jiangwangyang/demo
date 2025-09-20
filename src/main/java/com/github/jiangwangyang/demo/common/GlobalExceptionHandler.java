@@ -41,9 +41,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 超时异常处理
-     * Callable超时异常，此时response可能已经commit，不一定能够返回数据
-     * WebAsyncTask超时异常，此时response可能已经commit，不一定能够返回数据
-     * DeferredResult超时异常，此时可以返回数据
+     * 异步任务超时后仍可能返回数据 因此需要做额外判断
      */
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public Object handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e, HttpServletResponse response) {
