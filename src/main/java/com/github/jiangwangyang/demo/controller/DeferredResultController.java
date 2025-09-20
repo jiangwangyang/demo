@@ -12,7 +12,7 @@ import java.util.Map;
  * 只需往其中写数据即可，因此不会发生异常
  */
 @RestController
-public class DeferredController {
+public class DeferredResultController {
 
     @GetMapping("/deferred")
     public DeferredResult<Map<String, String>> deferred() {
