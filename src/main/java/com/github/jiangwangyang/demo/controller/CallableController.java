@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
  * 不推荐使用Callable，存在超时问题
  * 项目启动第一次请求超时必定无法正常返回数据
  */
+@Deprecated
 @RestController
 @Slf4j
 public class CallableController {

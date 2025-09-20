@@ -11,6 +11,7 @@ import java.util.Map;
  * 不推荐使用WebAsyncTask，存在超时问题
  * 项目启动第一次请求超时大概率无法正常返回数据
  */
+@Deprecated
 @RestController
 @Slf4j
 public class WebAsyncTaskController {
