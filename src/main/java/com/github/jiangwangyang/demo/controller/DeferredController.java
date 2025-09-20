@@ -14,9 +14,6 @@ import java.util.Map;
 @RestController
 public class DeferredController {
 
-    /**
-     * 正常返回
-     */
     @GetMapping("/deferred")
     public DeferredResult<Map<String, String>> deferred() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(1000L);
@@ -26,11 +23,21 @@ public class DeferredController {
 
     /**
      * 超时返回
-     * 必须编写DeferredAdvice处理超时，并且在AsyncSupportConfigurer中注册，否则超时不会被处理
+     * 需要在ControllerAdvice中处理超时异常（超时捕获时可以返回数据）
+     * 也可以在AsyncSupportConfigurer中添加Interceptors配置超时处理
      */
     @GetMapping("/deferred-timeout")
     public DeferredResult<Map<String, String>> deferredTimeout() {
-        return new DeferredResult<>(1000L);
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(1000L);
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            deferredResult.setResult(Map.of("data", "deferred"));
+        }).start();
+        return deferredResult;
     }
 
 }

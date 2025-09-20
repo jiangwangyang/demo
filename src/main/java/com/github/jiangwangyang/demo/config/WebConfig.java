@@ -1,7 +1,5 @@
 package com.github.jiangwangyang.demo.config;
 
-import com.github.jiangwangyang.demo.common.DeferredAdvice;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -10,9 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
-    @Autowired
-    private DeferredAdvice deferredAdvice;
 
     @Bean
     public ThreadPoolTaskExecutor mvcAsyncExecutor() {
@@ -31,8 +26,6 @@ public class WebConfig implements WebMvcConfigurer {
         configurer.setTaskExecutor(mvcAsyncExecutor());
         // 设置全局异步超时时间
         configurer.setDefaultTimeout(1000);
-        // 设置DeferredResult的超时处理
-        configurer.registerDeferredResultInterceptors(deferredAdvice);
     }
 
 }
