@@ -31,6 +31,16 @@ public class DeferredResultControllerTest {
     }
 
     @Test
+    void testDeferredError() {
+        client.get()
+                .uri("/deferred/error")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "deferred异常")))
+                .block();
+    }
+
+    @Test
     void testDeferredTimeout() {
         client.get()
                 .uri("/deferred/timeout")

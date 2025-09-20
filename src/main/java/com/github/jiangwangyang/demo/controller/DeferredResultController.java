@@ -24,6 +24,16 @@ public class DeferredResultController {
     }
 
     /**
+     * 直接setErrorResult设置异常 可以被ControllerAdvice捕获
+     */
+    @GetMapping("/deferred/error")
+    public DeferredResult<Map<String, String>> deferredResultError() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
+        new Thread(() -> deferredResult.setErrorResult(new RuntimeException("deferred异常"))).start();
+        return deferredResult;
+    }
+
+    /**
      * 超时异常可以直接被ControllerAdvice捕获
      * 也可以在AsyncSupportConfigurer中添加Interceptor处理
      */
