@@ -26,7 +26,7 @@ public class CallableControllerTest {
                 .uri("/callable")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "callable")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/callable")))
                 .block();
     }
 
@@ -36,7 +36,7 @@ public class CallableControllerTest {
                 .uri("/callable/error")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "callable异常")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "/callable/error")))
                 .block();
     }
 

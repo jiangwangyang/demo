@@ -18,7 +18,7 @@ public class CallableController {
 
     @GetMapping("/callable")
     public Callable<Map<String, String>> callable() {
-        return () -> Map.of("data", "callable");
+        return () -> Map.of("data", "/callable");
     }
 
     /**
@@ -28,7 +28,7 @@ public class CallableController {
     @GetMapping("/callable/error")
     public Callable<Map<String, String>> callableError() {
         return () -> {
-            throw new RuntimeException("callable异常");
+            throw new RuntimeException("/callable/error");
         };
     }
 
@@ -46,7 +46,7 @@ public class CallableController {
                 log.warn(e.getMessage());
                 Thread.sleep(1000);
             }
-            return Map.of("data", "callable超时");
+            return Map.of("data", "/callable/timeout");
         };
     }
 

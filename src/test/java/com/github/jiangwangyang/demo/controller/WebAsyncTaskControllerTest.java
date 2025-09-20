@@ -26,7 +26,7 @@ public class WebAsyncTaskControllerTest {
                 .uri("/webAsyncTask")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "webAsyncTask")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/webAsyncTask")))
                 .block();
     }
 
@@ -36,7 +36,7 @@ public class WebAsyncTaskControllerTest {
                 .uri("/webAsyncTask/error")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "webAsyncTask异常")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "/webAsyncTask/error")))
                 .block();
     }
 
@@ -56,7 +56,7 @@ public class WebAsyncTaskControllerTest {
                 .uri("/webAsyncTask/onTimeout")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "webAsyncTask超时")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "/webAsyncTask/onTimeout")))
                 .block();
     }
 
@@ -66,7 +66,7 @@ public class WebAsyncTaskControllerTest {
                 .uri("/webAsyncTask/bug")
                 .retrieve()
                 .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("bug", "webAsyncTask超时")))
+                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/webAsyncTask/bug")))
                 .block();
     }
 

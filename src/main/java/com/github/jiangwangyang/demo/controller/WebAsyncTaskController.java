@@ -18,7 +18,7 @@ public class WebAsyncTaskController {
 
     @GetMapping("/webAsyncTask")
     public WebAsyncTask<Map<String, String>> webAsyncTask() {
-        return new WebAsyncTask<>(100, () -> Map.of("data", "webAsyncTask"));
+        return new WebAsyncTask<>(100, () -> Map.of("data", "/webAsyncTask"));
     }
 
     /**
@@ -27,7 +27,7 @@ public class WebAsyncTaskController {
     @GetMapping("/webAsyncTask/error")
     public WebAsyncTask<Map<String, String>> webAsyncTaskError() {
         return new WebAsyncTask<>(100, () -> {
-            throw new RuntimeException("webAsyncTask异常");
+            throw new RuntimeException("/webAsyncTask/error");
         });
     }
 
@@ -43,7 +43,7 @@ public class WebAsyncTaskController {
                 log.warn(e.getMessage());
                 Thread.sleep(1000);
             }
-            return Map.of("data", "webAsyncTask超时");
+            return Map.of("data", "/webAsyncTask/timeout");
         });
     }
 
@@ -59,11 +59,11 @@ public class WebAsyncTaskController {
                 log.warn(e.getMessage());
                 Thread.sleep(1000);
             }
-            return Map.of("data", "webAsyncTask超时");
+            return Map.of("data", "/webAsyncTask/onTimeout");
         });
         webAsyncTask.onTimeout(() -> {
-            log.warn("webAsyncTask超时");
-            return Map.of("timeout", "webAsyncTask超时");
+            log.warn("超时：/webAsyncTask/onTimeout");
+            return Map.of("timeout", "/webAsyncTask/onTimeout");
         });
         return webAsyncTask;
     }
@@ -80,12 +80,12 @@ public class WebAsyncTaskController {
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
             }
-            return Map.of("bug", "webAsyncTask超时");
+            return Map.of("data", "/webAsyncTask/bug");
         });
         webAsyncTask.onTimeout(() -> {
-            log.warn("webAsyncTask超时");
+            log.warn("超时：/webAsyncTask/bug");
             Thread.sleep(100);
-            return Map.of("timeout", "webAsyncTask超时");
+            return Map.of("timeout", "/webAsyncTask/bug");
         });
         return webAsyncTask;
     }

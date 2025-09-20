@@ -19,7 +19,7 @@ public class DeferredResultController {
     @GetMapping("/deferred")
     public DeferredResult<Map<String, String>> deferredResult() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
-        new Thread(() -> deferredResult.setResult(Map.of("data", "deferred"))).start();
+        new Thread(() -> deferredResult.setResult(Map.of("data", "/deferred"))).start();
         return deferredResult;
     }
 
@@ -29,7 +29,7 @@ public class DeferredResultController {
     @GetMapping("/deferred/error")
     public DeferredResult<Map<String, String>> deferredResultError() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
-        new Thread(() -> deferredResult.setErrorResult(new RuntimeException("deferred异常"))).start();
+        new Thread(() -> deferredResult.setErrorResult(new RuntimeException("/deferred/error"))).start();
         return deferredResult;
     }
 
@@ -45,7 +45,7 @@ public class DeferredResultController {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
-            deferredResult.setResult(Map.of("data", "deferred超时"));
+            deferredResult.setResult(Map.of("data", "/deferred/timeout"));
         }).start();
         return deferredResult;
     }
@@ -57,15 +57,15 @@ public class DeferredResultController {
     public DeferredResult<Map<String, String>> deferredResultOnTimeout() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
         deferredResult.onTimeout(() -> {
-            log.warn("deferred超时");
-            deferredResult.setResult(Map.of("timeout", "deferred超时"));
+            log.warn("超时：/deferred/onTimeout");
+            deferredResult.setResult(Map.of("timeout", "/deferred/onTimeout"));
         });
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
-            deferredResult.setResult(Map.of("data", "deferred超时"));
+            deferredResult.setResult(Map.of("data", "/deferred/onTimeout"));
         }).start();
         return deferredResult;
     }
@@ -83,16 +83,16 @@ public class DeferredResultController {
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
             }
-            deferredResult.setResult(Map.of("bug", "deferred超时"));
+            deferredResult.setResult(Map.of("data", "/deferred/bug"));
         });
         deferredResult.onTimeout(() -> {
             thread.interrupt();
-            log.warn("deferred超时");
+            log.warn("超时：/deferred/bug");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
             }
-            deferredResult.setResult(Map.of("timeout", "deferred超时"));
+            deferredResult.setResult(Map.of("timeout", "/deferred/bug"));
         });
         thread.start();
         return deferredResult;
@@ -106,7 +106,7 @@ public class DeferredResultController {
                 Thread.sleep(80);
             } catch (InterruptedException ignored) {
             }
-            deferredResult.setResult(Map.of("data", "deferred终止"));
+            deferredResult.setResult(Map.of("data", "/deferred/terminate"));
         }).start();
         return deferredResult;
     }
