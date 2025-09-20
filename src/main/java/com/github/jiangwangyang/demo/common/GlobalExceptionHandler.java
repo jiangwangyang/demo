@@ -18,8 +18,15 @@ public class GlobalExceptionHandler {
      * 全局异常处理
      */
     @ExceptionHandler(Throwable.class)
-    public Map<String, String> handleThrowable(Throwable t) {
+    public Object handleThrowable(Throwable t, HttpServletResponse response) {
         log.error("全局异常：{}", t.getMessage());
+        if (response.isCommitted()) {
+            log.warn("response已commit，无法返回数据");
+            return null;
+        }
+        if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {
+            return "{\"error\": \"" + Optional.ofNullable(t.getMessage()).orElse("") + "\"}";
+        }
         return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
     }
 
