@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Throwable.class)
     public Map<String, String> handleThrowable(Throwable t) {
-        log.error("全局异常", t);
+        log.error("全局异常：{}", t.getMessage());
         return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
     }
 
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TaskRejectedException.class)
     public Map<String, String> handleTaskRejectedException(TaskRejectedException e) {
-        log.error("任务被拒绝异常", e);
+        log.error("任务被拒绝异常：{}", e.getMessage());
         return Map.of("rejected", "线程池已满");
     }
 
@@ -39,8 +39,8 @@ public class GlobalExceptionHandler {
      * DeferredResult超时异常，此时可以返回数据
      */
     @ExceptionHandler(AsyncRequestTimeoutException.class)
-    public Object handleAsyncRequestTimeoutException(HttpServletResponse response) {
-        log.warn("异步请求超时异常");
+    public Object handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e, HttpServletResponse response) {
+        log.warn("异步请求超时异常：{}", e.getMessage());
         if (response.isCommitted()) {
             log.warn("response已commit，无法返回数据");
             return null;
