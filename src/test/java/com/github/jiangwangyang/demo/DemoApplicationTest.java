@@ -8,6 +8,7 @@ public class DemoApplicationTest {
 
     @Test
     public void testDemoApplication() {
+        System.out.println("DemoApplicationTest");
     }
 
 }

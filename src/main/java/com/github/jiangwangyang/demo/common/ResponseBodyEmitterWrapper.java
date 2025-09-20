@@ -2,6 +2,7 @@ package com.github.jiangwangyang.demo.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
@@ -48,12 +49,12 @@ public class ResponseBodyEmitterWrapper extends ResponseBodyEmitter {
     }
 
     @Override
-    public void send(Object object) {
+    public void send(@NonNull Object object) {
         this.send(object, null);
     }
 
     @Override
-    public synchronized void send(Object object, @Nullable MediaType mediaType) {
+    public synchronized void send(@NonNull Object object, @Nullable MediaType mediaType) {
         try {
             super.send(object, mediaType);
         } catch (IOException e) {
@@ -64,7 +65,7 @@ public class ResponseBodyEmitterWrapper extends ResponseBodyEmitter {
     }
 
     @Override
-    public synchronized void send(Set<DataWithMediaType> items) {
+    public synchronized void send(@NonNull Set<DataWithMediaType> items) {
         try {
             super.send(items);
         } catch (IOException e) {

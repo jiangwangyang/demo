@@ -25,7 +25,7 @@ public class DeferredResultControllerTest {
         client.get()
                 .uri("/deferred")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "deferred")))
                 .block();
     }
@@ -35,7 +35,7 @@ public class DeferredResultControllerTest {
         client.get()
                 .uri("/deferred/error")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "deferred异常")))
                 .block();
     }
@@ -45,7 +45,7 @@ public class DeferredResultControllerTest {
         client.get()
                 .uri("/deferred/timeout")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "异步请求超时")))
                 .block();
     }
@@ -55,7 +55,7 @@ public class DeferredResultControllerTest {
         client.get()
                 .uri("/deferred/onTimeout")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "deferred超时")))
                 .block();
     }
@@ -65,7 +65,7 @@ public class DeferredResultControllerTest {
         client.get()
                 .uri("/deferred/bug")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("bug", "deferred超时")))
                 .block();
     }

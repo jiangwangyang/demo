@@ -25,7 +25,7 @@ public class WebAsyncTaskControllerTest {
         client.get()
                 .uri("/webAsyncTask")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "webAsyncTask")))
                 .block();
     }
@@ -35,7 +35,7 @@ public class WebAsyncTaskControllerTest {
         client.get()
                 .uri("/webAsyncTask/error")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "webAsyncTask异常")))
                 .block();
     }
@@ -45,7 +45,7 @@ public class WebAsyncTaskControllerTest {
         client.get()
                 .uri("/webAsyncTask/timeout")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "异步请求超时")))
                 .block();
     }
@@ -55,7 +55,7 @@ public class WebAsyncTaskControllerTest {
         client.get()
                 .uri("/webAsyncTask/onTimeout")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "webAsyncTask超时")))
                 .block();
     }
@@ -65,7 +65,7 @@ public class WebAsyncTaskControllerTest {
         client.get()
                 .uri("/webAsyncTask/bug")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("bug", "webAsyncTask超时")))
                 .block();
     }

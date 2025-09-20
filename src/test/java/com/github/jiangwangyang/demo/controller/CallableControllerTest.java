@@ -25,7 +25,7 @@ public class CallableControllerTest {
         client.get()
                 .uri("/callable")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "callable")))
                 .block();
     }
@@ -35,7 +35,7 @@ public class CallableControllerTest {
         client.get()
                 .uri("/callable/error")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "callable异常")))
                 .block();
     }
@@ -45,7 +45,7 @@ public class CallableControllerTest {
         client.get()
                 .uri("/callable/timeout")
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(Object.class)
                 .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "异步请求超时")))
                 .block();
     }
