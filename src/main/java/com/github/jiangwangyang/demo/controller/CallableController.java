@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * 不推荐使用Callable，存在超时问题
- * 项目启动第一次请求超时必定无法正常返回数据
+ * 这些异步方法都存在超时问题
+ * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据造成冲突
+ * 注意：在超时时，执行异步方法的线程会被interrupt
  */
-@Deprecated
 @RestController
 @Slf4j
 public class CallableController {
@@ -22,29 +22,31 @@ public class CallableController {
     }
 
     /**
+     * 异常可以直接被ControllerAdvice捕获
+     * 也可以在AsyncSupportConfigurer中添加Interceptor处理
+     */
+    @GetMapping("/callable/error")
+    public Callable<Map<String, String>> callableError() {
+        return () -> {
+            throw new RuntimeException("callable异常");
+        };
+    }
+
+    /**
      * 不支持自定义超时时间
      * 只能在AsyncSupportConfigurer中设置全局超时时间
-     * 需要在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
-     * 项目启动第一次请求超时必定无法正常返回数据
+     * 超时异常可以直接被ControllerAdvice捕获
      */
     @GetMapping("/callable/timeout")
     public Callable<Map<String, String>> callableTimeout() {
         return () -> {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+                Thread.sleep(1000);
             }
             return Map.of("data", "callable超时");
-        };
-    }
-
-    /**
-     * 异常可以直接被ControllerAdvice捕获
-     */
-    @GetMapping("/callable/error")
-    public Callable<Map<String, String>> callableError() {
-        return () -> {
-            throw new RuntimeException("callable异常");
         };
     }
 

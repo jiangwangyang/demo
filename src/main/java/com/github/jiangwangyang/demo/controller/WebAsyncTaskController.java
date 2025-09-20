@@ -8,10 +8,10 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 import java.util.Map;
 
 /**
- * 不推荐使用WebAsyncTask，存在超时问题
- * 项目启动第一次请求超时大概率无法正常返回数据
+ * 这些异步方法都存在超时问题
+ * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据造成冲突
+ * 注意：在超时时，执行异步方法的线程会被interrupt
  */
-@Deprecated
 @RestController
 @Slf4j
 public class WebAsyncTaskController {
@@ -22,30 +22,42 @@ public class WebAsyncTaskController {
     }
 
     /**
-     * 在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
-     * 项目启动第一次请求超时大概率无法正常返回数据
+     * 异常可以直接被ControllerAdvice捕获
+     */
+    @GetMapping("/webAsyncTask/error")
+    public WebAsyncTask<Map<String, String>> webAsyncTaskError() {
+        return new WebAsyncTask<>(100, () -> {
+            throw new RuntimeException("webAsyncTask异常");
+        });
+    }
+
+    /**
+     * 超时异常可以直接被ControllerAdvice捕获
      */
     @GetMapping("/webAsyncTask/timeout")
     public WebAsyncTask<Map<String, String>> webAsyncTaskTimeout() {
         return new WebAsyncTask<>(100, () -> {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+                Thread.sleep(1000);
             }
             return Map.of("data", "webAsyncTask超时");
         });
     }
 
     /**
-     * 设置onTimeout回调方法处理超时
-     * 项目启动第一次请求超时大概率无法正常返回数据
+     * 超时优先由onTimeout回调方法处理
      */
     @GetMapping("/webAsyncTask/onTimeout")
     public WebAsyncTask<Map<String, String>> webAsyncTaskOnTimeout() {
         WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                log.warn(e.getMessage());
+                Thread.sleep(1000);
             }
             return Map.of("data", "webAsyncTask超时");
         });
@@ -54,16 +66,6 @@ public class WebAsyncTaskController {
             return Map.of("timeout", "webAsyncTask超时");
         });
         return webAsyncTask;
-    }
-
-    /**
-     * 异常可以直接被ControllerAdvice捕获
-     */
-    @GetMapping("/webAsyncTask/error")
-    public WebAsyncTask<Map<String, String>> webAsyncTaskError() {
-        return new WebAsyncTask<>(100, () -> {
-            throw new RuntimeException("webAsyncTask异常");
-        });
     }
 
 }

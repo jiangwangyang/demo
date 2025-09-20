@@ -1,5 +1,6 @@
 package com.github.jiangwangyang.demo.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -7,11 +8,12 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.Map;
 
 /**
- * 推荐使用DeferredResult
- * 可以全局捕获超时异常进行处理，并且可以返回数据
- * 只需往其中写数据即可，因此不会发生异常
+ * 这些异步方法都存在超时问题
+ * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据造成冲突
+ * DeferredResult只需在最后设置数据，异步执行则要由程序员自己控制
  */
 @RestController
+@Slf4j
 public class DeferredResultController {
 
     @GetMapping("/deferred")
@@ -22,13 +24,32 @@ public class DeferredResultController {
     }
 
     /**
-     * 超时返回
-     * 需要在ControllerAdvice中处理超时异常（超时捕获时可以返回数据）
-     * 也可以在AsyncSupportConfigurer中添加Interceptors配置超时处理
+     * 超时异常可以直接被ControllerAdvice捕获
+     * 也可以在AsyncSupportConfigurer中添加Interceptor处理
      */
     @GetMapping("/deferred/timeout")
     public DeferredResult<Map<String, String>> deferredResultTimeout() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+            deferredResult.setResult(Map.of("data", "deferred超时"));
+        }).start();
+        return deferredResult;
+    }
+
+    /**
+     * 超时优先由onTimeout回调方法处理
+     */
+    @GetMapping("/deferred/onTimeout")
+    public DeferredResult<Map<String, String>> deferredResultOnTimeout() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
+        deferredResult.onTimeout(() -> {
+            log.warn("deferred超时");
+            deferredResult.setResult(Map.of("timeout", "deferred超时"));
+        });
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
