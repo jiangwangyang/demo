@@ -7,9 +7,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.Map;
 
 /**
- * DeferredResult 控制器
- * 需要处理超时
- * 写数据不会发生错误，无需处理
+ * 推荐使用DeferredResult
+ * 可以全局捕获超时异常进行处理，并且可以返回数据
+ * 只需往其中写数据即可，因此不会发生异常
  */
 @RestController
 public class DeferredController {
@@ -34,7 +34,7 @@ public class DeferredController {
                 Thread.sleep(2000L);
             } catch (InterruptedException ignored) {
             }
-            deferredResult.setResult(Map.of("data", "deferred"));
+            deferredResult.setResult(Map.of("data", "deferred超时"));
         }).start();
         return deferredResult;
     }

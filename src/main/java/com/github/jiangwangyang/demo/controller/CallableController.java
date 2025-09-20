@@ -7,33 +7,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+/**
+ * 不推荐使用Callable，存在超时问题
+ * 项目启动第一次请求超时必定无法正常返回数据
+ */
 @RestController
 @Slf4j
 public class CallableController {
 
     @GetMapping("/callable")
     public Callable<Map<String, String>> callable() {
-        return () -> {
-            log.info("callable执行");
-            return Map.of("data", "callable");
-        };
+        return () -> Map.of("data", "callable");
     }
 
     /**
      * 不支持自定义超时时间
      * 只能在AsyncSupportConfigurer中设置全局超时时间
      * 需要在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
-     * 不推荐在AsyncSupportConfigurer中添加Interceptors配置超时处理
+     * 项目启动第一次请求超时必定无法正常返回数据
      */
     @GetMapping("/callable/timeout")
     public Callable<Map<String, String>> callableTimeout() {
         return () -> {
-            log.info("callableTimeout执行");
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ignored) {
             }
-            return Map.of("data", "callable timeout");
+            return Map.of("data", "callable超时");
         };
     }
 
@@ -43,8 +43,7 @@ public class CallableController {
     @GetMapping("/callable/error")
     public Callable<Map<String, String>> callableError() {
         return () -> {
-            log.info("callableError执行");
-            throw new RuntimeException("callable error");
+            throw new RuntimeException("callable异常");
         };
     }
 
