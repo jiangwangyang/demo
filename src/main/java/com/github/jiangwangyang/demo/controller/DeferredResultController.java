@@ -39,4 +39,17 @@ public class DeferredResultController {
         return deferredResult;
     }
 
+    @GetMapping("/deferred/terminate")
+    public DeferredResult<Map<String, String>> deferredResultTerminate() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
+        new Thread(() -> {
+            try {
+                Thread.sleep(80);
+            } catch (InterruptedException ignored) {
+            }
+            deferredResult.setResult(Map.of("data", "deferred终止"));
+        }).start();
+        return deferredResult;
+    }
+
 }

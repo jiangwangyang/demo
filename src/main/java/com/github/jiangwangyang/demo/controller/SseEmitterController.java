@@ -72,4 +72,16 @@ public class SseEmitterController {
         return sse;
     }
 
+    @GetMapping("/sse/terminate")
+    public SseEmitter sseTerminate(HttpServletResponse response) {
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        SseEmitterWrapper sse = new SseEmitterWrapper(100L);
+        new Thread(() -> {
+            sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
+            sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
+            sse.complete();
+        }).start();
+        return sse;
+    }
+
 }
