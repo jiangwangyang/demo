@@ -15,8 +15,8 @@ import java.util.Map;
 public class DeferredResultController {
 
     @GetMapping("/deferred")
-    public DeferredResult<Map<String, String>> deferred() {
-        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(1000L);
+    public DeferredResult<Map<String, String>> deferredResult() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
         new Thread(() -> deferredResult.setResult(Map.of("data", "deferred"))).start();
         return deferredResult;
     }
@@ -27,11 +27,11 @@ public class DeferredResultController {
      * 也可以在AsyncSupportConfigurer中添加Interceptors配置超时处理
      */
     @GetMapping("/deferred/timeout")
-    public DeferredResult<Map<String, String>> deferredTimeout() {
-        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(1000L);
+    public DeferredResult<Map<String, String>> deferredResultTimeout() {
+        DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
         new Thread(() -> {
             try {
-                Thread.sleep(2000L);
+                Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
             deferredResult.setResult(Map.of("data", "deferred超时"));

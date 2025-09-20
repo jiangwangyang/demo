@@ -18,7 +18,7 @@ public class WebAsyncTaskController {
 
     @GetMapping("/webAsyncTask")
     public WebAsyncTask<Map<String, String>> webAsyncTask() {
-        return new WebAsyncTask<>(1000, () -> Map.of("data", "webAsyncTask"));
+        return new WebAsyncTask<>(100, () -> Map.of("data", "webAsyncTask"));
     }
 
     /**
@@ -27,9 +27,9 @@ public class WebAsyncTaskController {
      */
     @GetMapping("/webAsyncTask/timeout")
     public WebAsyncTask<Map<String, String>> webAsyncTaskTimeout() {
-        return new WebAsyncTask<>(1000, () -> {
+        return new WebAsyncTask<>(100, () -> {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
             return Map.of("data", "webAsyncTask超时");
@@ -42,9 +42,9 @@ public class WebAsyncTaskController {
      */
     @GetMapping("/webAsyncTask/onTimeout")
     public WebAsyncTask<Map<String, String>> webAsyncTaskOnTimeout() {
-        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(1000, () -> {
+        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
             return Map.of("data", "webAsyncTask超时");
@@ -61,7 +61,7 @@ public class WebAsyncTaskController {
      */
     @GetMapping("/webAsyncTask/error")
     public WebAsyncTask<Map<String, String>> webAsyncTaskError() {
-        return new WebAsyncTask<>(1000, () -> {
+        return new WebAsyncTask<>(100, () -> {
             throw new RuntimeException("webAsyncTask异常");
         });
     }

@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 设置SpringMVC的异步线程池
         configurer.setTaskExecutor(mvcAsyncExecutor());
         // 设置全局异步超时时间
-        configurer.setDefaultTimeout(1000);
+        configurer.setDefaultTimeout(100);
     }
 
 }

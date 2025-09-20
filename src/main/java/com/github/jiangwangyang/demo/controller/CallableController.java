@@ -31,7 +31,7 @@ public class CallableController {
     public Callable<Map<String, String>> callableTimeout() {
         return () -> {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
             return Map.of("data", "callable超时");
