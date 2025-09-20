@@ -23,6 +23,7 @@ import java.util.Set;
  */
 @Slf4j
 public class SseEmitterWrapper extends SseEmitter {
+
     private static final VarHandle COMPLETE_HANDLE;
 
     static {
@@ -50,34 +51,19 @@ public class SseEmitterWrapper extends SseEmitter {
 
     @Override
     public void send(Object object) {
-        try {
-            super.send(object);
-        } catch (IOException e) {
-            log.warn("SseEmitterWrapper.send() IOException: {}", e.getMessage());
-        } catch (IllegalStateException e) {
-            log.warn("SseEmitterWrapper.send() IllegalStateException: {}", e.getMessage());
-        }
+        this.send(object, null);
     }
 
     @Override
     public void send(Object object, @Nullable MediaType mediaType) {
-        try {
-            super.send(object, mediaType);
-        } catch (IOException e) {
-            log.warn("SseEmitterWrapper.send() IOException: {}", e.getMessage());
-        } catch (IllegalStateException e) {
-            log.warn("SseEmitterWrapper.send() IllegalStateException: {}", e.getMessage());
-        }
+        this.send(event().data(object, mediaType));
     }
 
     @Override
     public void send(SseEventBuilder builder) {
-        try {
-            super.send(builder);
-        } catch (IOException e) {
-            log.warn("SseEmitterWrapper.send() IOException: {}", e.getMessage());
-        } catch (IllegalStateException e) {
-            log.warn("SseEmitterWrapper.send() IllegalStateException: {}", e.getMessage());
+        Set<ResponseBodyEmitter.DataWithMediaType> dataToSend = builder.build();
+        synchronized (this) {
+            this.send(dataToSend);
         }
     }
 

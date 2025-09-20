@@ -15,13 +15,11 @@ public class SseEmitterController {
     public SseEmitter sseEmitter(HttpServletResponse response) {
         response.setCharacterEncoding("utf-8");
         SseEmitterWrapper sse = new SseEmitterWrapper(100L);
-        sse.onCompletion(() -> log.info("onCompletion complete: {}", sse.isComplete()));
         new Thread(() -> {
             sse.send("你好");
             sse.send("你好");
             sse.complete();
             sse.complete();
-            log.info("complete: {}", sse.isComplete());
         }).start();
         return sse;
     }
@@ -30,15 +28,12 @@ public class SseEmitterController {
     public SseEmitter sseTimeout(HttpServletResponse response) {
         response.setCharacterEncoding("utf-8");
         SseEmitterWrapper sse = new SseEmitterWrapper(100L);
-        sse.onCompletion(() -> log.info("onCompletion complete: {}", sse.isComplete()));
-        sse.onTimeout(() -> log.info("onTimeout complete: {}", sse.isComplete()));
         new Thread(() -> {
             sse.send("你好");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {
             }
-            log.info("complete: {}", sse.isComplete());
             sse.send("你好");
             sse.send("你好");
             sse.complete();
@@ -53,11 +48,9 @@ public class SseEmitterController {
     public SseEmitter sseError(HttpServletResponse response) {
         response.setCharacterEncoding("utf-8");
         SseEmitterWrapper sse = new SseEmitterWrapper(100L);
-        sse.onCompletion(() -> log.info("onCompletion complete: {}", sse.isComplete()));
         new Thread(() -> {
             sse.send("你好");
             sse.completeWithError(new RuntimeException("sse异常"));
-            log.info("complete: {}", sse.isComplete());
             sse.send("你好");
             sse.send("你好");
             sse.complete();
