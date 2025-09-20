@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 线程池满拒绝异常
+     * 线程池拒绝异常处理
      */
     @ExceptionHandler(TaskRejectedException.class)
     public Map<String, String> handleTaskRejectedException(TaskRejectedException e) {
@@ -33,15 +33,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 超时异常处理
      * Callable超时异常，此时response可能已经commit，不一定能够返回数据
+     * WebAsyncTask超时异常，此时response可能已经commit，不一定能够返回数据
      * DeferredResult超时异常，此时可以返回数据
-     *
      */
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public Object handleAsyncRequestTimeoutException(HttpServletResponse response) {
         log.warn("异步请求超时异常");
         if (response.isCommitted()) {
-            log.info("response已commit，无法返回数据");
+            log.warn("response已commit，无法返回数据");
             return null;
         }
         if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {

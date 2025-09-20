@@ -14,7 +14,7 @@ public class CallableController {
     @GetMapping("/callable")
     public Callable<Map<String, String>> callable() {
         return () -> {
-            log.info("callable 执行");
+            log.info("callable执行");
             return Map.of("data", "callable");
         };
     }
@@ -25,10 +25,10 @@ public class CallableController {
      * 需要在ControllerAdvice中处理超时异常（超时捕获时不一定能够返回数据，需要额外判断）
      * 不推荐在AsyncSupportConfigurer中添加Interceptors配置超时处理
      */
-    @GetMapping("/callable-timeout")
+    @GetMapping("/callable/timeout")
     public Callable<Map<String, String>> callableTimeout() {
         return () -> {
-            log.info("callable timeout 执行");
+            log.info("callableTimeout执行");
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ignored) {
@@ -40,10 +40,10 @@ public class CallableController {
     /**
      * 异常可以直接被ControllerAdvice捕获
      */
-    @GetMapping("/callable-error")
+    @GetMapping("/callable/error")
     public Callable<Map<String, String>> callableError() {
         return () -> {
-            log.info("callable error 执行");
+            log.info("callableError执行");
             throw new RuntimeException("callable error");
         };
     }

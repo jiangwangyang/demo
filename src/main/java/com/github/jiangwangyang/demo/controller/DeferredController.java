@@ -26,14 +26,13 @@ public class DeferredController {
      * 需要在ControllerAdvice中处理超时异常（超时捕获时可以返回数据）
      * 也可以在AsyncSupportConfigurer中添加Interceptors配置超时处理
      */
-    @GetMapping("/deferred-timeout")
+    @GetMapping("/deferred/timeout")
     public DeferredResult<Map<String, String>> deferredTimeout() {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(1000L);
         new Thread(() -> {
             try {
                 Thread.sleep(2000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException ignored) {
             }
             deferredResult.setResult(Map.of("data", "deferred"));
         }).start();
