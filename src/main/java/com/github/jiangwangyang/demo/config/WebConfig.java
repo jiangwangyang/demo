@@ -6,18 +6,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
+    @Bean("mvcAsyncExecutor")
     public ThreadPoolTaskExecutor mvcAsyncExecutor() {
-        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
-        ex.setCorePoolSize(2);
-        ex.setMaxPoolSize(2);
-        ex.setQueueCapacity(0);
-        ex.setThreadNamePrefix("mvc-async-");
-        ex.initialize();
-        return ex;
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(0);
+        executor.setThreadNamePrefix("mvc-async-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        executor.initialize();
+        return executor;
     }
 
     @Override
