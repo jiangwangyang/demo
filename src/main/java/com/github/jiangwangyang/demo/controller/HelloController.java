@@ -12,6 +12,7 @@ public class HelloController {
 
     @GetMapping("/hello")
     public Map<String, String> hello() {
+        log.info("hello");
         return Map.of("data", "你好");
     }
 

@@ -1,5 +1,12 @@
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 5
+    mbeanregistry:
+      enabled: true
+    remoteip:
+      protocol-header: x-forwarded-proto
   servlet:
     context-path: /
   compression:
@@ -11,23 +18,19 @@ server:
       enabled: false
     include-message: always
     include-binding-errors: always
+  shutdown: graceful
 spring:
-  web:
-    cors:
-      allowed-origins: "*"
-      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-      allowed-headers: "*"
-      allow-credentials: false
+  threads:
+    virtual:
+      enabled: true
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
-  resources:
-    cache:
-      period: 1h
-    chain:
-      cache: true
-    static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
+      max-file-size: 1MB
+      max-request-size: 1MB
+  mvc:
+    servlet:
+      path: /
+      load-on-startup: 1
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8

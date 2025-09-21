@@ -6,6 +6,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +14,15 @@ import java.util.Optional;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    /**
+     * 404处理
+     * 3.2版本后才有
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Map<String, String> handleNoHandlerFoundException(NoResourceFoundException e) {
+        return Map.of("404", e.getMessage());
+    }
 
     /**
      * 全局异常处理
