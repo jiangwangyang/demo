@@ -14,8 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean("mvcAsyncExecutor")
     public ThreadPoolTaskExecutor mvcAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(5);
         executor.setQueueCapacity(0);
         executor.setThreadNamePrefix("mvc-async-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

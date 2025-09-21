@@ -18,8 +18,8 @@ public class AppConfig {
     @Bean("taskExecutor")
     public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(5);
         executor.setQueueCapacity(0);
         executor.setThreadNamePrefix("async-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
@@ -30,7 +30,7 @@ public class AppConfig {
     @Bean("taskScheduler")
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(2);
+        scheduler.setPoolSize(5);
         scheduler.setThreadNamePrefix("scheduling-");
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         scheduler.setAwaitTerminationSeconds(30);

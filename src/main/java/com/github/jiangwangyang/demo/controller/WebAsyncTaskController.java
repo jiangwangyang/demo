@@ -9,7 +9,8 @@ import java.util.Map;
 
 /**
  * 这些异步方法都存在超时问题
- * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据造成冲突
+ * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据导致结果不确定性
+ * 注意：在某些版本会因超时数据冲突导致异常
  * 注意：在超时时，执行异步方法的线程会被interrupt
  */
 @RestController
@@ -38,10 +39,10 @@ public class WebAsyncTaskController {
     public WebAsyncTask<Map<String, String>> webAsyncTaskTimeout() {
         return new WebAsyncTask<>(100, () -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
             return Map.of("data", "/webAsyncTask/timeout");
         });
@@ -54,10 +55,10 @@ public class WebAsyncTaskController {
     public WebAsyncTask<Map<String, String>> webAsyncTaskOnTimeout() {
         WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
             return Map.of("data", "/webAsyncTask/onTimeout");
         });
@@ -76,7 +77,7 @@ public class WebAsyncTaskController {
     public WebAsyncTask<Map<String, String>> webAsyncTaskBug() {
         WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
             }

@@ -46,8 +46,9 @@ public class ResponseBodyEmitterController {
             emitter.send("你");
             emitter.send("好");
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             emitter.send("你");
             emitter.send("好");

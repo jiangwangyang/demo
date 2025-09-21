@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * 这些异步方法都存在超时问题
- * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据造成冲突
+ * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据导致结果不确定性
  * DeferredResult只需在最后设置数据，异步执行则要由程序员自己控制
  */
 @RestController
@@ -42,8 +42,9 @@ public class DeferredResultController {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             deferredResult.setResult(Map.of("data", "/deferred/timeout"));
         }).start();
@@ -62,8 +63,9 @@ public class DeferredResultController {
         });
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             deferredResult.setResult(Map.of("data", "/deferred/onTimeout"));
         }).start();
@@ -79,7 +81,7 @@ public class DeferredResultController {
         DeferredResult<Map<String, String>> deferredResult = new DeferredResult<>(100L);
         Thread thread = new Thread(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.warn(e.getMessage());
             }

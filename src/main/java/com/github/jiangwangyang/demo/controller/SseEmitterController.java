@@ -41,8 +41,9 @@ public class SseEmitterController {
             sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
             sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
             sse.send(Map.of("data", "你好"), MediaType.APPLICATION_JSON);
