@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public Map<String, String> handleNoHandlerFoundException(NoResourceFoundException e) {
+        log.info("NoResourceFoundException：{}", e.getMessage());
         return Map.of("404", e.getMessage());
     }
 
@@ -29,7 +31,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Throwable.class)
     public Object handleThrowable(Throwable t, HttpServletResponse response) {
-        log.error("全局异常：{}", t.getMessage());
+        log.error("全局异常！", t);
         if (response.isCommitted()) {
             log.warn("response已commit，无法返回数据");
             return null;
@@ -45,8 +47,16 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TaskRejectedException.class)
     public Map<String, String> handleTaskRejectedException(TaskRejectedException e) {
-        log.error("任务被拒绝异常：{}", e.getMessage());
+        log.error("TaskRejectedException：{}", e.getMessage());
         return Map.of("rejected", "线程池已满");
+    }
+
+    /**
+     * 流式返回消息时，如果客户端已断开连接，会抛出CompletionException
+     */
+    @ExceptionHandler(IOException.class)
+    public void handleIOException(IOException e) {
+        log.warn("IOException：{}", e.getMessage());
     }
 
     /**
@@ -55,7 +65,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public Object handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e, HttpServletResponse response) {
-        log.warn("异步请求超时异常：{}", e.getMessage());
+        log.warn("AsyncRequestTimeoutException：{}", e.getMessage());
         if (response.isCommitted()) {
             log.warn("response已commit，无法返回数据");
             return null;

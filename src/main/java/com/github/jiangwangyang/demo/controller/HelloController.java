@@ -21,9 +21,4 @@ public class HelloController {
         throw new RuntimeException("异常");
     }
 
-    @GetMapping("/terminate")
-    public Map<String, String> terminate() {
-        return Map.of("data", "_terminate".repeat(1 << 16));
-    }
-
 }

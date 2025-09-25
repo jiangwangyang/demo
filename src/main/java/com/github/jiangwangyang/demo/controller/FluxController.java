@@ -1,6 +1,7 @@
 package com.github.jiangwangyang.demo.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +12,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @RestController
+@Slf4j
 public class FluxController {
 
     @GetMapping("/flux")
@@ -55,12 +58,15 @@ public class FluxController {
                 .onErrorResume(ex -> Flux.just(ServerSentEvent.builder(Map.of("error", ex.getMessage())).build()));
     }
 
+    /**
+     * 手工测试断开连接
+     */
     @GetMapping("/flux/terminate")
     public Flux<ServerSentEvent<Map<String, String>>> fluxTerminate(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        return Flux.fromIterable(List.of(
-                        ServerSentEvent.builder(Map.of("data", "你好")).build(),
-                        ServerSentEvent.builder(Map.of("data", "你好")).build()))
+        return Flux.fromStream(IntStream
+                        .range(0, 10)
+                        .mapToObj(i -> ServerSentEvent.builder(Map.of("data", "/flux/terminate")).build()))
                 .map(e -> {
                     try {
                         Thread.sleep(1000);
