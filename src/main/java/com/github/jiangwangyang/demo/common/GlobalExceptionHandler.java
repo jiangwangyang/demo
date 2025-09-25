@@ -17,12 +17,18 @@ import java.util.Optional;
 public class GlobalExceptionHandler {
 
     /**
-     * 全局异常处理
-     * 不应该处理异步异常，异步异常应该专门捕获处理
+     * 全局异常处理 返回类型要全面
      */
     @ExceptionHandler(Throwable.class)
     public Object handleThrowable(Throwable t, HttpServletResponse response) {
         log.error("全局异常！", t);
+        if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {
+            String result = "{\"error\": \"%s\"}".formatted(Optional.ofNullable(t.getMessage()).orElse(""));
+            if (response.getContentType().toLowerCase().contains("text/event-stream")) {
+                return "data:" + result + "\n\n";
+            }
+            return result;
+        }
         return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
     }
 

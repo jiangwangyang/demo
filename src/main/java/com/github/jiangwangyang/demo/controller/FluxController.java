@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 @RestController
 @Slf4j
@@ -21,41 +20,48 @@ public class FluxController {
     @GetMapping("/flux")
     public Flux<ServerSentEvent<Map<String, String>>> flux(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        return Flux.fromIterable(List.of(
-                ServerSentEvent.builder(Map.of("data", "你好")).build(),
-                ServerSentEvent.builder(Map.of("data", "你好")).build()));
+        return Flux.range(0, 10)
+                .map(i -> ServerSentEvent.builder(Map.of("data", "你好")).build())
+                .delayElements(Duration.ofMillis(100));
     }
 
+    @GetMapping("/flux/heartbeat")
+    public Flux<ServerSentEvent<Map<String, String>>> fluxHeartbeat(HttpServletResponse response) {
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        Flux<ServerSentEvent<Map<String, String>>> dataFlux = Flux.range(0, 10)
+                .map(i -> ServerSentEvent.builder(Map.of("data", "/flux/heartbeat")).build())
+                .delayElements(Duration.ofMillis(100));
+        Flux<ServerSentEvent<Map<String, String>>> heartbeatFlux = Flux.interval(Duration.ZERO, Duration.ofMillis(100))
+                .map(l -> ServerSentEvent.builder(Map.of("heartbeat", "")).build());
+        return Flux.merge(dataFlux, heartbeatFlux)
+                .takeUntilOther(dataFlux.then());
+    }
+
+    /**
+     * timeout指两次数据之间超时
+     * take指整个Flux数据流超时
+     */
     @GetMapping("/flux/timeout")
     public Flux<ServerSentEvent<Map<String, String>>> fluxTimeout(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        return Flux.fromIterable(List.of(
-                        ServerSentEvent.builder(Map.of("data", "timeout")).build(),
-                        ServerSentEvent.builder(Map.of("data", "timeout")).build()))
-                .map(e -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    return e;
-                })
-                .timeout(Duration.ofMillis(100), Flux.just(ServerSentEvent.builder(Map.of("timeout", "flux")).build()));
+        return Flux.range(0, 10)
+                .map(i -> ServerSentEvent.builder(Map.of("data", "/flux/timeout")).build())
+                .delayElements(Duration.ofMillis(1000))
+                .take(Duration.ofMillis(2100));
     }
 
     @GetMapping("/flux/error")
     public Flux<ServerSentEvent<Map<String, String>>> fluxError(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         return Flux.fromIterable(List.of(
-                        ServerSentEvent.builder(Map.of("data", "error")).build(),
-                        ServerSentEvent.builder(Map.of("data", "!")).build()))
+                        ServerSentEvent.builder(Map.of("data", "/flux/error")).build(),
+                        ServerSentEvent.builder(Map.of("data", "flag")).build()))
                 .map(e -> {
-                    if ("!".equals(Optional.ofNullable(e.data()).map(data -> data.get("data")).orElse(null))) {
+                    if ("flag".equals(Optional.ofNullable(e.data()).map(data -> data.get("data")).orElse(null))) {
                         throw new RuntimeException("error");
                     }
                     return e;
-                })
-                .onErrorResume(ex -> Flux.just(ServerSentEvent.builder(Map.of("error", ex.getMessage())).build()));
+                });
     }
 
     /**
@@ -64,17 +70,9 @@ public class FluxController {
     @GetMapping("/flux/terminate")
     public Flux<ServerSentEvent<Map<String, String>>> fluxTerminate(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        return Flux.fromStream(IntStream
-                        .range(0, 10)
-                        .mapToObj(i -> ServerSentEvent.builder(Map.of("data", "/flux/terminate")).build()))
-                .map(e -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    return e;
-                });
+        return Flux.range(0, 10)
+                .map(i -> ServerSentEvent.builder(Map.of("data", "/flux/terminate")).build())
+                .delayElements(Duration.ofMillis(1000));
     }
 
 }
