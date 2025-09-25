@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
+ * @deprecated 不应使用除流式接口以外的任何异步响应
  * 这些异步方法都存在超时问题
  * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据导致结果不确定性
  * 注意：在某些版本会因超时数据冲突导致异常
  * 注意：在超时时，执行异步方法的线程会被interrupt
  */
+@Deprecated
 @RestController
 @Slf4j
 public class CallableController {

@@ -17,29 +17,23 @@ import java.util.Optional;
 public class GlobalExceptionHandler {
 
     /**
+     * 全局异常处理
+     * 不应该处理异步异常，异步异常应该专门捕获处理
+     */
+    @ExceptionHandler(Throwable.class)
+    public Object handleThrowable(Throwable t, HttpServletResponse response) {
+        log.error("全局异常！", t);
+        return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
+    }
+
+    /**
      * 404处理
-     * 3.2版本后才有
+     * SpringBoot3.2版本后才有
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public Map<String, String> handleNoHandlerFoundException(NoResourceFoundException e) {
         log.info("NoResourceFoundException：{}", e.getMessage());
         return Map.of("404", e.getMessage());
-    }
-
-    /**
-     * 全局异常处理
-     */
-    @ExceptionHandler(Throwable.class)
-    public Object handleThrowable(Throwable t, HttpServletResponse response) {
-        log.error("全局异常！", t);
-        if (response.isCommitted()) {
-            log.warn("response已commit，无法返回数据");
-            return null;
-        }
-        if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {
-            return "{\"error\": \"" + Optional.ofNullable(t.getMessage()).orElse("") + "\"}";
-        }
-        return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
     }
 
     /**
@@ -52,7 +46,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 流式返回消息时，如果客户端已断开连接，会抛出CompletionException
+     * 流式返回消息时，如果客户端已断开连接，会抛出IOException
      */
     @ExceptionHandler(IOException.class)
     public void handleIOException(IOException e) {
@@ -60,9 +54,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 超时异常处理
+     * @deprecated 不应使用除流式接口以外的任何异步响应 因此该异常处理也不应被使用
+     * 异步接口超时异常处理
      * 异步任务超时后仍可能返回数据 因此需要做额外判断
      */
+    @Deprecated
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public Object handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e, HttpServletResponse response) {
         log.warn("AsyncRequestTimeoutException：{}", e.getMessage());

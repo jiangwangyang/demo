@@ -8,10 +8,12 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.Map;
 
 /**
+ * @deprecated 不应使用除流式接口以外的任何异步响应
  * 这些异步方法都存在超时问题
  * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据导致结果不确定性
  * DeferredResult只需在最后设置数据，异步执行则要由程序员自己控制
  */
+@Deprecated
 @RestController
 @Slf4j
 public class DeferredResultController {
