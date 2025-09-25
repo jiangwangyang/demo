@@ -80,4 +80,25 @@ public class ControllerTerminateTest {
         Thread.sleep(1000);
     }
 
+    @Test
+    void testFluxTerminate() throws InterruptedException {
+        try {
+            client.get()
+                    .uri("/flux/terminate")
+                    .retrieve()
+                    .bodyToFlux(DataBuffer.class)
+                    .take(1)
+                    .doOnNext(buf -> {
+                        byte[] bytes = new byte[buf.readableByteCount()];
+                        buf.read(bytes);
+                        System.out.println(new String(bytes, StandardCharsets.UTF_8));
+                        DataBufferUtils.release(buf);
+                    })
+                    .blockFirst(Duration.ofMillis(50));
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
+        Thread.sleep(1000);
+    }
+
 }
