@@ -23,8 +23,9 @@ public class FluxController {
 
     /**
      * 推荐写法
-     * 不要用 take 整体请求超时应由请求方来做 服务方响应时间应由业务逻辑控制
-     * timeout 设置数据间隔超时
+     * 不推荐用take设置超时 因为不能自定义响应结果
+     * timeout 设置数据间隔超时 应写在业务处理之前
+     * 业务处理
      * onErrorResume TimeoutException 处理超时异常，返回默认值
      * onErrorResume 处理其它异常，返回默认值
      * doOnSubscribe 记录订阅事件
@@ -35,9 +36,11 @@ public class FluxController {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         return Flux.range(0, 10)
                 .delayElements(Duration.ofMillis(100))
-                .map(i -> ServerSentEvent.builder(Map.of("data", "/flux")).build())
-                // .take(Duration.ofMillis(30_000))
+                // 先对上游数据设置超时 下游业务时间应由业务代码自己把控
                 .timeout(Duration.ofMillis(1000))
+                // 然后再对上游数据进行业务处理 超时不应写在业务逻辑之后
+                .map(i -> ServerSentEvent.builder(Map.of("data", "/flux")).build())
+                // 最后做异常处理和日志输出
                 .onErrorResume(TimeoutException.class, e -> {
                     log.error("flux timeout: {}", e.getMessage());
                     return Flux.just(ServerSentEvent.builder(Map.of("timeout", "/flux")).build());
