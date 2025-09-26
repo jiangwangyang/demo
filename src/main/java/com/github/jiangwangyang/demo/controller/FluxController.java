@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 流式数据推荐使用WebFlux或Emitter
+ * 流式数据推荐使用WebFlux
+ * 使用Emitter需要手工控制发送和结束，更容易出错
  */
 @RestController
 @Slf4j
@@ -26,6 +27,8 @@ public class FluxController {
      * 不推荐用take设置超时 因为不能自定义响应结果
      * timeout 设置数据间隔超时 应写在业务处理之前
      * 业务处理
+     * onErrorResume TimeoutException 处理超时异常，返回默认值
+     * 注意：如果是webclient请求数据 直接给webclient配置超时即可 不要在业务处理中设置超时
      * onErrorResume TimeoutException 处理超时异常，返回默认值
      * onErrorResume 处理其它异常，返回默认值
      * doOnSubscribe 记录订阅事件
