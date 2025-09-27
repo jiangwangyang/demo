@@ -10,7 +10,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 @RestControllerAdvice
 @Slf4j
@@ -21,15 +20,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Throwable.class)
     public Object handleThrowable(Throwable t, HttpServletResponse response) {
-        log.error("全局异常！", t);
+        log.error("全局异常", t);
         if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {
-            String result = "{\"error\": \"%s\"}".formatted(Optional.ofNullable(t.getMessage()).orElse(""));
-            if (response.getContentType().toLowerCase().contains("text/event-stream")) {
-                return "data:" + result + "\n\n";
-            }
-            return result;
+            return "{\"error\": \"全局异常\"}";
         }
-        return Map.of("error", Optional.ofNullable(t.getMessage()).orElse(""));
+        return Map.of("error", "全局异常");
     }
 
     /**
@@ -47,8 +42,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TaskRejectedException.class)
     public Map<String, String> handleTaskRejectedException(TaskRejectedException e) {
-        log.error("TaskRejectedException：{}", e.getMessage());
-        return Map.of("rejected", "线程池已满");
+        log.warn("TaskRejectedException：{}", e.getMessage());
+        return Map.of("rejected", e.getMessage());
     }
 
     /**
@@ -60,22 +55,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * @deprecated 不应使用除流式接口以外的任何异步响应 因此该异常处理也不应被使用
+     * @deprecated 不应设置响应超时时间 超时时间应由请求方控制 响应方应通过限制资源使用来避免超时
      * 异步接口超时异常处理
-     * 异步任务超时后仍可能返回数据 因此需要做额外判断
+     * 超时处理不应返回数据 只应打印日志 提醒业务线程等
      */
     @Deprecated
     @ExceptionHandler(AsyncRequestTimeoutException.class)
-    public Object handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e, HttpServletResponse response) {
+    public void handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e) {
         log.warn("AsyncRequestTimeoutException：{}", e.getMessage());
-        if (response.isCommitted()) {
-            log.warn("response已commit，无法返回数据");
-            return null;
-        }
-        if (response.getContentType() != null && !response.getContentType().toLowerCase().contains("application/json")) {
-            return "{\"timeout\": \"异步请求超时\"}";
-        }
-        return Map.of("timeout", "异步请求超时");
     }
 
 }

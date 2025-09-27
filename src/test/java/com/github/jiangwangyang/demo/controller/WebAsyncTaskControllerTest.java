@@ -3,7 +3,9 @@ package com.github.jiangwangyang.demo.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -22,52 +24,29 @@ public class WebAsyncTaskControllerTest {
 
     @Test
     void testWebAsyncTask() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/webAsyncTask")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/webAsyncTask")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isEqualTo(Map.of("data", "/webAsyncTask"));
     }
 
     @Test
     void testWebAsyncTaskError() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/webAsyncTask/error")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "/webAsyncTask/error")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isEqualTo(Map.of("error", "全局异常"));
     }
 
     @Test
     void testWebAsyncTaskTimeout() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/webAsyncTask/timeout")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "异步请求超时")))
-                .block();
-    }
-
-    @Test
-    void testWebAsyncTaskOnTimeout() {
-        client.get()
-                .uri("/webAsyncTask/onTimeout")
-                .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "/webAsyncTask/onTimeout")))
-                .block();
-    }
-
-    @Test
-    void testWebAsyncTaskBug() {
-        client.get()
-                .uri("/webAsyncTask/bug")
-                .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/webAsyncTask/bug")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isNull();
     }
 
 }

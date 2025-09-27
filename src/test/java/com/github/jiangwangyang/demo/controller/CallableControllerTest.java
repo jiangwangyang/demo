@@ -3,7 +3,9 @@ package com.github.jiangwangyang.demo.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -22,32 +24,29 @@ public class CallableControllerTest {
 
     @Test
     void testCallable() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/callable")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("data", "/callable")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isEqualTo(Map.of("data", "/callable"));
     }
 
     @Test
     void testCallableError() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/callable/error")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("error", "/callable/error")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isEqualTo(Map.of("error", "全局异常"));
     }
 
     @Test
     void testCallableTimeout() {
-        client.get()
+        Mono<Map<String, String>> mono = client.get()
                 .uri("/callable/timeout")
                 .retrieve()
-                .bodyToMono(Object.class)
-                .doOnNext(map -> assertThat(map).isInstanceOf(Map.class).isEqualTo(Map.of("timeout", "异步请求超时")))
-                .block();
+                .bodyToMono(ParameterizedTypeReference.forType(Map.class));
+        assertThat(mono.block()).isNull();
     }
 
 }

@@ -8,11 +8,7 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 import java.util.Map;
 
 /**
- * @deprecated 不应使用除流式接口以外的任何异步响应
- * 这些异步方法都存在超时问题
- * 如果在超时的瞬间返回数据，则会导致该异步方法和超时处理同时返回数据导致结果不确定性
- * 注意：在某些版本会因超时数据冲突导致异常
- * 注意：在超时时，执行异步方法的线程会被interrupt
+ * @deprecated 不推荐使用除流式接口以外的任何异步响应
  */
 @Deprecated
 @RestController
@@ -25,7 +21,7 @@ public class WebAsyncTaskController {
     }
 
     /**
-     * 异常可以直接被ControllerAdvice捕获
+     * 支持自定义异常处理
      */
     @GetMapping("/webAsyncTask/error")
     public WebAsyncTask<Map<String, String>> webAsyncTaskError() {
@@ -35,62 +31,21 @@ public class WebAsyncTaskController {
     }
 
     /**
-     * 超时异常可以直接被ControllerAdvice捕获
+     * @deprecated 不应设置响应超时时间 超时时间应由请求方控制 响应方应通过限制资源使用来避免超时
+     * 支持自定义超时时间，也支持自定义超时回调
+     * 超时处理不应返回数据 只应打印日志 提醒业务线程等
      */
+    @Deprecated
     @GetMapping("/webAsyncTask/timeout")
     public WebAsyncTask<Map<String, String>> webAsyncTaskTimeout() {
         return new WebAsyncTask<>(100, () -> {
             try {
                 Thread.sleep(5000);
+                return Map.of("data", "/webAsyncTask/timeout");
             } catch (InterruptedException e) {
-                log.warn(e.getMessage());
-                Thread.sleep(5000);
+                return null;
             }
-            return Map.of("data", "/webAsyncTask/timeout");
         });
-    }
-
-    /**
-     * 超时优先由onTimeout回调方法处理
-     */
-    @GetMapping("/webAsyncTask/onTimeout")
-    public WebAsyncTask<Map<String, String>> webAsyncTaskOnTimeout() {
-        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                log.warn(e.getMessage());
-                Thread.sleep(5000);
-            }
-            return Map.of("data", "/webAsyncTask/onTimeout");
-        });
-        webAsyncTask.onTimeout(() -> {
-            log.warn("超时：/webAsyncTask/onTimeout");
-            return Map.of("timeout", "/webAsyncTask/onTimeout");
-        });
-        return webAsyncTask;
-    }
-
-    /**
-     * 超时bug示例
-     * 超时回调被执行，但返回大概率是未超时的结果
-     */
-    @GetMapping("/webAsyncTask/bug")
-    public WebAsyncTask<Map<String, String>> webAsyncTaskBug() {
-        WebAsyncTask<Map<String, String>> webAsyncTask = new WebAsyncTask<>(100, () -> {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                log.warn(e.getMessage());
-            }
-            return Map.of("data", "/webAsyncTask/bug");
-        });
-        webAsyncTask.onTimeout(() -> {
-            log.warn("超时：/webAsyncTask/bug");
-            Thread.sleep(100);
-            return Map.of("timeout", "/webAsyncTask/bug");
-        });
-        return webAsyncTask;
     }
 
 }
