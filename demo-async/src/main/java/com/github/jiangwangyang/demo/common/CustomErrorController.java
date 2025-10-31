@@ -14,10 +14,12 @@ import java.net.URI;
 import java.util.Optional;
 
 /**
+ * @deprecated 建议只使用ControllerAdvice
  * 自定义错误控制器
- * 必须实现ErrorController
+ * 必须实现ErrorController接口
  * 所有没有映射的错误请求都将被这个控制器处理
  */
+@Deprecated
 @Controller
 @Slf4j
 public class CustomErrorController implements ErrorController {

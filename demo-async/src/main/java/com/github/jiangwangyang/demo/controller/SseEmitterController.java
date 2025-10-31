@@ -11,6 +11,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * @deprecated 建议只使用FLux
+ */
+@Deprecated
 @RestController
 @Slf4j
 public class SseEmitterController {

@@ -11,9 +11,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter
 import java.nio.charset.StandardCharsets;
 
 /**
- * SSE适合用来发送结构数据
- * Emitter适合用于发送无结构数据
+ * @deprecated 建议只使用FLux
  */
+@Deprecated
 @RestController
 @Slf4j
 public class ResponseBodyEmitterController {

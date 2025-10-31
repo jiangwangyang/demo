@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.Set;
 
 /**
+ * @deprecated 建议只使用FLux
  * 包装SseEmitter
  * 增加complete状态
  * 结束后再send会抛出异常 现已捕获
@@ -22,6 +23,7 @@ import java.util.Set;
  * 不建议使用completeWithError方法 异常会被ControllerAdvice捕获 但如果之前已经发过数据 则不可再返回数据
  * 推荐使用send+complete方法 或者自定义异常 并在ControllerAdvice中不返回数据
  */
+@Deprecated
 @Slf4j
 public class SseEmitterWrapper extends SseEmitter {
 
