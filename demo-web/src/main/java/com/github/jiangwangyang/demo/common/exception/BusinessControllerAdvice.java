@@ -12,11 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 @Slf4j
-public class BusinessExceptionHandler {
-
-    /**
-     * 业务异常处理
-     */
+public class BusinessControllerAdvice {
     @ExceptionHandler(BusinessException.class)
     public Response<?> handleBusinessException(BusinessException e) {
         Logger log = LoggerFactory.getLogger(e.getStackTrace()[0].getClassName());
