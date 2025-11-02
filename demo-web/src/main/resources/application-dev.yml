@@ -1,0 +1,23 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+  compression:
+    enabled: true
+    min-response-size: 2KB
+  servlet:
+    context-path: /
+  tomcat:
+    threads:
+      max: 200
+      max-queue-capacity: 800
+spring:
+  threads:
+    virtual:
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 10MB
+  mvc:
+    servlet:
+      load-on-startup: 1
