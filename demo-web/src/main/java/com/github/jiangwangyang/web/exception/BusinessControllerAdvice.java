@@ -1,6 +1,6 @@
-package com.github.jiangwangyang.demo.common.exception;
+package com.github.jiangwangyang.web.exception;
 
-import com.github.jiangwangyang.demo.common.response.Response;
+import com.github.jiangwangyang.web.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.common.exception;
+package com.github.jiangwangyang.web.exception;
 
 import org.springframework.core.NestedRuntimeException;
 

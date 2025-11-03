@@ -1,7 +1,7 @@
 package com.github.jiangwangyang.demo.controller;
 
-import com.github.jiangwangyang.demo.common.util.RequestUtil;
-import com.github.jiangwangyang.demo.common.util.ResponseWriteUtil;
+import com.github.jiangwangyang.web.util.RequestUtil;
+import com.github.jiangwangyang.web.util.ResponseWriteUtil;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

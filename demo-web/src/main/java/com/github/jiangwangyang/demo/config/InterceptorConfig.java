@@ -1,8 +1,8 @@
 package com.github.jiangwangyang.demo.config;
 
-import com.github.jiangwangyang.demo.common.interceptor.ExecutionTimeHandlerInterceptor;
-import com.github.jiangwangyang.demo.common.interceptor.LogHandlerInterceptor;
-import com.github.jiangwangyang.demo.common.interceptor.Utf8HandlerInterceptor;
+import com.github.jiangwangyang.web.interceptor.ExecutionTimeHandlerInterceptor;
+import com.github.jiangwangyang.web.interceptor.LogHandlerInterceptor;
+import com.github.jiangwangyang.web.interceptor.Utf8HandlerInterceptor;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

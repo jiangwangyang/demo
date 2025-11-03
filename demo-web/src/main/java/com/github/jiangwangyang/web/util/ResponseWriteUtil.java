@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.common.util;
+package com.github.jiangwangyang.web.util;
 
 import lombok.SneakyThrows;
 import org.springframework.http.codec.ServerSentEvent;

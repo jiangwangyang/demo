@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.common.util;
+package com.github.jiangwangyang.web.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

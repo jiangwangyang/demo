@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.common.response;
+package com.github.jiangwangyang.web.response;
 
 import lombok.Data;
 

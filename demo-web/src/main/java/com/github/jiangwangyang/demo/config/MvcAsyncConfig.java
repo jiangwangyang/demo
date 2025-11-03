@@ -1,6 +1,6 @@
 package com.github.jiangwangyang.demo.config;
 
-import com.github.jiangwangyang.demo.common.util.ResponseWriteUtil;
+import com.github.jiangwangyang.web.util.ResponseWriteUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;

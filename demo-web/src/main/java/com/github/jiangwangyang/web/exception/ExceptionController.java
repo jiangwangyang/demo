@@ -1,6 +1,6 @@
-package com.github.jiangwangyang.demo.common.exception;
+package com.github.jiangwangyang.web.exception;
 
-import com.github.jiangwangyang.demo.common.response.Response;
+import com.github.jiangwangyang.web.response.Response;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

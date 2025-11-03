@@ -1,4 +1,4 @@
-package com.github.jiangwangyang.demo.common.interceptor;
+package com.github.jiangwangyang.web.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

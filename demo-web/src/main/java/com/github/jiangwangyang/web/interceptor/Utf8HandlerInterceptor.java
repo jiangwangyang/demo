@@ -1,19 +1,19 @@
-package com.github.jiangwangyang.demo.common.interceptor;
+package com.github.jiangwangyang.web.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.nio.charset.StandardCharsets;
+
 /**
- * 日志拦截器 记录请求日志
+ * 设置所有请求的响应字符编码默认为UTF-8
  */
-@Slf4j
-public class LogHandlerInterceptor implements HandlerInterceptor {
+public class Utf8HandlerInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
-        log.info("收到请求 {} {}", request.getMethod(), request.getRequestURI());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         return true;
     }
 }
