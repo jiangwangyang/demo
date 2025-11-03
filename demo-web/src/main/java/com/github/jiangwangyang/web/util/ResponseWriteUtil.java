@@ -2,6 +2,7 @@ package com.github.jiangwangyang.web.util;
 
 import lombok.SneakyThrows;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -26,14 +27,37 @@ public final class ResponseWriteUtil {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse().getWriter();
     }
 
+    /**
+     * 将对象转换为sse格式字符串
+     * @param data 要转换的对象 如果不是sse对象则会自动包装为sse对象
+     * @return sse格式字符串
+     * @see ServerSentEventHttpMessageWriter
+     */
     private static String encodeSse(Object data) {
         ServerSentEvent<?> sse = data instanceof ServerSentEvent<?> _sse ? _sse : ServerSentEvent.builder(data).build();
+        StringBuilder sb = new StringBuilder();
+        if (sse.id() != null) {
+            sb.append("id").append(':').append(sse.id()).append('\n');
+        }
+        if (sse.event() != null) {
+            sb.append("event").append(':').append(sse.event()).append('\n');
+        }
+        if (sse.retry() != null) {
+            sb.append("retry").append(':').append(sse.retry().toMillis()).append('\n');
+        }
+        if (sse.comment() != null) {
+            sb.append(':').append(StringUtils.replace(sse.comment(), "\n", "\n:")).append('\n');
+        }
+        if (sse.data() != null) {
+            sb.append("data:");
+        }
+        String sseText = sb.toString();
         if (sse.data() == null) {
-            return sse.format() + "\n";
+            return sseText + "\n";
         } else if (sse.data() instanceof String text) {
-            return sse.format() + StringUtils.replace(text, "\n", "\ndata:") + "\n\n";
+            return sseText + StringUtils.replace(text, "\n", "\ndata:") + "\n\n";
         } else {
-            return sse.format() + ObjectMapperUtil.writeValueAsString(sse.data()) + "\n\n";
+            return sseText + ObjectMapperUtil.writeValueAsString(sse.data()) + "\n\n";
         }
     }
 
