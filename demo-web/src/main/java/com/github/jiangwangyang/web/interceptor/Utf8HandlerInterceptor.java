@@ -1,8 +1,8 @@
 package com.github.jiangwangyang.web.interceptor;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.nio.charset.StandardCharsets;
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class Utf8HandlerInterceptor implements HandlerInterceptor {
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
+    public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object handler) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         return true;
     }

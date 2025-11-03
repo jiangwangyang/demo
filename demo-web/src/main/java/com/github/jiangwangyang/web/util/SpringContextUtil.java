@@ -1,10 +1,10 @@
 package com.github.jiangwangyang.web.util;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.NonNull;
 
 /**
  * Spring 上下文工具类
@@ -36,7 +36,7 @@ public class SpringContextUtil implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
         SpringContextUtil.applicationContext = applicationContext;
     }
 }
