@@ -1,6 +1,6 @@
 package com.github.jiangwangyang.web.response;
 
-import com.github.jiangwangyang.web.util.RequestUtil;
+import com.github.jiangwangyang.web.util.RequestExtraUtil;
 import jakarta.annotation.Nonnull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -25,16 +25,14 @@ public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> 
 
     @Override
     public Response<?> beforeBodyWrite(Response<?> body, @Nonnull MethodParameter returnType, @Nonnull MediaType selectedContentType, @Nonnull Class<? extends HttpMessageConverter<?>> selectedConverterType, @Nonnull ServerHttpRequest request, @Nonnull ServerHttpResponse response) {
-        Map<String, Object> extraMap = RequestUtil.getAttribute("extra");
-        if (extraMap != null) {
-            if (body.getExtra() == null) {
-                body.setExtra(extraMap);
-            } else {
-                for (Map.Entry<String, Object> entry : extraMap.entrySet()) {
-                    body.getExtra().putIfAbsent(entry.getKey(), entry.getValue());
-                }
-            }
+        if (body == null) {
+            return null;
         }
+        Map<String, Object> extraMap = RequestExtraUtil.getExtraMap();
+        if (body.getExtra() != null) {
+            extraMap.putAll(body.getExtra());
+        }
+        body.setExtra(extraMap);
         return body;
     }
 }
