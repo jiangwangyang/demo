@@ -5,8 +5,8 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 请求额外信息工具类
@@ -50,7 +50,7 @@ public final class RequestExtraUtil {
     @Nonnull
     public Map<String, Object> getExtraMap() {
         if (request.getAttribute(EXTRA_ATTRIBUTE_NAME) == null) {
-            request.setAttribute(EXTRA_ATTRIBUTE_NAME, new HashMap<>());
+            request.setAttribute(EXTRA_ATTRIBUTE_NAME, new ConcurrentHashMap<>());
         }
         return (Map<String, Object>) request.getAttribute(EXTRA_ATTRIBUTE_NAME);
     }
