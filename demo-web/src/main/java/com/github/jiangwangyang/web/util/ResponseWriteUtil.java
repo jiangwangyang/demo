@@ -1,15 +1,15 @@
 package com.github.jiangwangyang.web.util;
 
+import jakarta.annotation.Nonnull;
 import lombok.SneakyThrows;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * HttpServletResponse写入工具类
@@ -23,8 +23,10 @@ public final class ResponseWriteUtil {
     }
 
     @SneakyThrows
+    @Nonnull
     private static PrintWriter getWriter() {
-        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse().getWriter();
+        return Optional.ofNullable(RequestUtil.getResponse().getWriter())
+                .orElseThrow();
     }
 
     /**
@@ -33,7 +35,8 @@ public final class ResponseWriteUtil {
      * @return sse格式字符串
      * @see ServerSentEventHttpMessageWriter
      */
-    private static String encodeSse(Object data) {
+    @Nonnull
+    private static String encodeSse(@Nonnull Object data) {
         ServerSentEvent<?> sse = data instanceof ServerSentEvent<?> _sse ? _sse : ServerSentEvent.builder(data).build();
         StringBuilder sb = new StringBuilder();
         if (sse.id() != null) {
@@ -66,7 +69,7 @@ public final class ResponseWriteUtil {
      * 注意：该工具类是同步阻塞的，请勿在非阻塞线程中调用
      * @param text 要写入的文本内容
      */
-    public static void writeText(String text) {
+    public static void writeText(@Nonnull String text) {
         getWriter().write(text);
     }
 
@@ -75,7 +78,7 @@ public final class ResponseWriteUtil {
      * 注意：该工具类是同步阻塞的，请勿在非阻塞线程中调用
      * @param data 要写入的对象 如果不是sse对象则会自动包装为sse对象
      */
-    public static void writeSse(Object data) {
+    public static void writeSse(@Nonnull Object data) {
         getWriter().write(encodeSse(data));
     }
 
@@ -84,7 +87,7 @@ public final class ResponseWriteUtil {
      * 会自动将Flux发布到Schedulers.boundedElastic()的可阻塞线程中写入
      * @param flux 要写入的流式文本内容
      */
-    public static void writeTextFlux(Flux<String> flux) {
+    public static void writeTextFlux(@Nonnull Flux<String> flux) {
         PrintWriter writer = getWriter();
         flux.publishOn(Schedulers.boundedElastic())
                 .doOnNext(writer::write)
@@ -96,7 +99,7 @@ public final class ResponseWriteUtil {
      * 会自动将Flux发布到Schedulers.boundedElastic()的可阻塞线程中写入
      * @param flux 要写入流式sse内容 如果数据流不是sse对象则会自动包装为sse对象
      */
-    public static <T> void writeSseFlux(Flux<T> flux) {
+    public static <T> void writeSseFlux(@Nonnull Flux<T> flux) {
         PrintWriter writer = getWriter();
         flux.publishOn(Schedulers.boundedElastic())
                 .map(ResponseWriteUtil::encodeSse)

@@ -16,7 +16,7 @@ public final class RequestExtraUtil {
     @Getter
     private final HttpServletRequest request;
 
-    private RequestExtraUtil(HttpServletRequest request) {
+    private RequestExtraUtil(@Nonnull HttpServletRequest request) {
         this.request = request;
     }
 
@@ -24,6 +24,7 @@ public final class RequestExtraUtil {
      * 获取请求额外信息工具类对象 在请求线程调用可直接封装request对象
      * @return 请求额外信息工具类对象
      */
+    @Nonnull
     public static RequestExtraUtil of() {
         return new RequestExtraUtil(RequestUtil.getRequest());
     }
@@ -34,7 +35,8 @@ public final class RequestExtraUtil {
      * @param request 请求对象
      * @return 请求额外信息工具类对象
      */
-    public static RequestExtraUtil of(HttpServletRequest request) {
+    @Nonnull
+    public static RequestExtraUtil of(@Nonnull HttpServletRequest request) {
         return new RequestExtraUtil(request);
     }
 
@@ -54,5 +56,4 @@ public final class RequestExtraUtil {
         }
         return (Map<String, Object>) request.getAttribute(EXTRA_ATTRIBUTE_NAME);
     }
-
 }

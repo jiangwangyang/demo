@@ -1,9 +1,13 @@
 package com.github.jiangwangyang.web.util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Optional;
 
 /**
  * 请求工具类
@@ -17,16 +21,22 @@ public final class RequestUtil {
      * 获取当前请求对象
      * @return 当前请求对象
      */
+    @Nonnull
     public static HttpServletRequest getRequest() {
-        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        return Optional.ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .map(ServletRequestAttributes::getRequest)
+                .orElseThrow();
     }
 
     /**
      * 获取当前响应对象
      * @return 当前响应对象
      */
+    @Nonnull
     public static HttpServletResponse getResponse() {
-        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        return Optional.ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .map(ServletRequestAttributes::getResponse)
+                .orElseThrow();
     }
 
     /**
@@ -35,7 +45,8 @@ public final class RequestUtil {
      * @param name 属性名
      * @return 属性值
      */
-    public static <T> T getAttribute(String name) {
+    @Nullable
+    public static <T> T getAttribute(@Nonnull String name) {
         return (T) getRequest().getAttribute(name);
     }
 
@@ -45,7 +56,15 @@ public final class RequestUtil {
      * @param name  属性名
      * @param value 属性值
      */
-    public static void setAttribute(String name, Object value) {
+    public static void setAttribute(@Nonnull String name, @Nonnull Object value) {
         getRequest().setAttribute(name, value);
+    }
+
+    /**
+     * 移除当前请求属性
+     * @param name 属性名
+     */
+    public static void removeAttribute(@Nonnull String name) {
+        getRequest().removeAttribute(name);
     }
 }
