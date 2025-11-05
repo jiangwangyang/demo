@@ -10,69 +10,49 @@ import java.util.Map;
 
 /**
  * 请求额外信息工具类
- * 注意：必须在Spring请求线程中调用，否则会抛出异常
  */
-public class RequestExtraUtil {
-
+public final class RequestExtraUtil {
     public static final String EXTRA_ATTRIBUTE_NAME = "extra";
+    @Getter
+    private final HttpServletRequest request;
 
-    private RequestExtraUtil() {
+    private RequestExtraUtil(HttpServletRequest request) {
+        this.request = request;
+    }
+
+    /**
+     * 获取请求额外信息工具类对象 在请求线程调用可直接封装request对象
+     * @return 请求额外信息工具类对象
+     */
+    public static RequestExtraUtil of() {
+        return new RequestExtraUtil(RequestUtil.getRequest());
+    }
+
+    /**
+     * 获取请求额外信息工具类对象 在非请求线程调用
+     * 由于RequestExtraUtil只能在当前请求线程使用，如果要在别的线程使用，则必须主动注入request对象
+     * @param request 请求对象
+     * @return 请求额外信息工具类对象
+     */
+    public static RequestExtraUtil of(HttpServletRequest request) {
+        return new RequestExtraUtil(request);
     }
 
     @Nullable
-    public static <T> T getExtra(@Nonnull String name) {
+    public <T> T getExtra(@Nonnull String name) {
         return (T) getExtraMap().get(name);
     }
 
-    public static void setExtra(@Nonnull String name, @Nonnull Object value) {
+    public void setExtra(@Nonnull String name, @Nonnull Object value) {
         getExtraMap().put(name, value);
     }
 
     @Nonnull
-    public static Map<String, Object> getExtraMap() {
-        if (RequestUtil.getAttribute(EXTRA_ATTRIBUTE_NAME) == null) {
-            RequestUtil.setAttribute(EXTRA_ATTRIBUTE_NAME, new HashMap<>());
+    public Map<String, Object> getExtraMap() {
+        if (request.getAttribute(EXTRA_ATTRIBUTE_NAME) == null) {
+            request.setAttribute(EXTRA_ATTRIBUTE_NAME, new HashMap<>());
         }
-        return RequestUtil.getAttribute(EXTRA_ATTRIBUTE_NAME);
+        return (Map<String, Object>) request.getAttribute(EXTRA_ATTRIBUTE_NAME);
     }
 
-    /**
-     * 获取请求额外信息工具类包装对象
-     * 由于RequestExtraUtil只能在当前请求线程使用，如果要在别的线程使用，则必须主动注入request对象
-     * @param request 请求对象
-     * @return 请求额外信息工具类包装对象
-     */
-    public static RequestExtraUtilWrapper of(HttpServletRequest request) {
-        return new RequestExtraUtilWrapper(request);
-    }
-
-    /**
-     * 请求额外信息工具类包装对象
-     * 由于RequestExtraUtil只能在当前请求线程使用，如果要在别的线程使用，则必须主动注入request对象
-     */
-    public static final class RequestExtraUtilWrapper {
-        @Getter
-        private final HttpServletRequest request;
-
-        private RequestExtraUtilWrapper(HttpServletRequest request) {
-            this.request = request;
-        }
-
-        @Nullable
-        public <T> T getExtra(@Nonnull String name) {
-            return (T) getExtraMap().get(name);
-        }
-
-        public void setExtra(@Nonnull String name, @Nonnull Object value) {
-            getExtraMap().put(name, value);
-        }
-
-        @Nonnull
-        public Map<String, Object> getExtraMap() {
-            if (request.getAttribute(EXTRA_ATTRIBUTE_NAME) == null) {
-                request.setAttribute(EXTRA_ATTRIBUTE_NAME, new HashMap<>());
-            }
-            return (Map<String, Object>) request.getAttribute(EXTRA_ATTRIBUTE_NAME);
-        }
-    }
 }

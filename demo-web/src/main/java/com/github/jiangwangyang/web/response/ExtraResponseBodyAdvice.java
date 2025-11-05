@@ -28,7 +28,7 @@ public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> 
         if (body == null) {
             return null;
         }
-        Map<String, Object> extraMap = RequestExtraUtil.getExtraMap();
+        Map<String, Object> extraMap = RequestExtraUtil.of().getExtraMap();
         if (body.getExtra() != null) {
             extraMap.putAll(body.getExtra());
         }

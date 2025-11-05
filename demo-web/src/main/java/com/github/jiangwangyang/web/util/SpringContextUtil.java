@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContextAware;
  * Spring 上下文工具类
  * 需要注入Spring容器初始化ApplicationContext
  */
-public class SpringContextUtil implements ApplicationContextAware {
+public final class SpringContextUtil implements ApplicationContextAware {
 
     @Getter
     private static ApplicationContext applicationContext;
