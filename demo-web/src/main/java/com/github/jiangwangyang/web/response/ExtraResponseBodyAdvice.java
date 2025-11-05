@@ -1,7 +1,9 @@
 package com.github.jiangwangyang.web.response;
 
 import com.github.jiangwangyang.web.util.RequestExtraUtil;
+import com.github.jiangwangyang.web.util.RequestUtil;
 import jakarta.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -15,8 +17,10 @@ import java.util.Map;
 /**
  * 响应体增强器
  * 将请求中的extra属性添加到响应体中
+ * 记录日志
  */
 @ControllerAdvice
+@Slf4j
 public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> {
     @Override
     public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
@@ -33,6 +37,7 @@ public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> 
             extraMap.putAll(body.getExtra());
         }
         body.setExtra(extraMap);
+        log.info("{} {} {}", RequestUtil.getRequest().getMethod(), RequestUtil.getRequest().getRequestURI(), extraMap);
         return body;
     }
 }

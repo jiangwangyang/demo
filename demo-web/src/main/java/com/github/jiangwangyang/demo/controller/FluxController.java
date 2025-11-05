@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -17,6 +18,7 @@ public class FluxController {
     @GetMapping
     public void flux() {
         RequestUtil.getResponse().setContentType("text/event-stream");
+        RequestUtil.getResponse().setCharacterEncoding(StandardCharsets.UTF_8.name());
         Flux<?> flux = Flux.just(
                 "hello",
                 "world",

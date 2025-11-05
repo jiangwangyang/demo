@@ -22,9 +22,14 @@ public final class Record {
         return recordTask::execute;
     }
 
-    @SneakyThrows
     public static <T> Callable<T> of(Map<String, Object> recordMap, String taskName, Callable<T> task) {
-        RecordTask<T> recordTask = new RecordTask<>(recordMap, taskName, task::call);
+        RecordTask<T> recordTask = new RecordTask<>(recordMap, taskName, new Supplier<>() {
+            @SneakyThrows
+            @Override
+            public T get() {
+                return task.call();
+            }
+        });
         return recordTask::execute;
     }
 

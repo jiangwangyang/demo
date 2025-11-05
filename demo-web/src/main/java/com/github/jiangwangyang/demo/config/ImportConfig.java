@@ -7,15 +7,13 @@ import com.github.jiangwangyang.web.response.ExtraResponseBodyAdvice;
 import com.github.jiangwangyang.web.util.ObjectMapperUtil;
 import com.github.jiangwangyang.web.util.SpringContextUtil;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@EnableAspectJAutoProxy
 @Import({
-        RecordAspect.class,
-        ExceptionController.class,
         BusinessExceptionHandler.class,
+        ExceptionController.class,
+        RecordAspect.class,
         ExtraResponseBodyAdvice.class,
         ObjectMapperUtil.class,
         SpringContextUtil.class
