@@ -2,12 +2,15 @@ package com.github.jiangwangyang.demo;
 
 import com.github.jiangwangyang.demo.controller.DemoController;
 import com.github.jiangwangyang.web.response.Response;
+import com.github.jiangwangyang.web.util.ObjectMapperUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,5 +36,50 @@ public class DemoApplicationTest {
                 })
                 .block();
         assertThat(vo).isEqualTo(Response.success(new DemoController.VO("demo"), Map.of()));
+    }
+
+    @Test
+    void testException() {
+        Response<?> vo = webClient
+                .post()
+                .uri("/exception")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Response<?>>() {
+                })
+                .block();
+        assertThat(vo).isEqualTo(Response.success("", Map.of()));
+    }
+
+    @Test
+    void testBusinessException() {
+        Response<?> vo = webClient
+                .post()
+                .uri("/exception/business")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Response<?>>() {
+                })
+                .block();
+        assertThat(vo).isEqualTo(Response.fail("", Map.of()));
+    }
+
+    @Test
+    void testFlux() {
+        List<?> list = webClient
+                .post()
+                .uri("/flux")
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {
+                })
+                .map(ServerSentEvent::data)
+                .toStream()
+                .toList();
+        assertThat(list).isEqualTo(List.of(
+                "hello",
+                "world",
+                ObjectMapperUtil.writeValueAsString(Map.of("hello", "world")),
+                "hello",
+                "world",
+                ObjectMapperUtil.writeValueAsString(Map.of("hello", "world"))
+        ));
     }
 }

@@ -24,6 +24,7 @@ public class ExceptionController implements ErrorController {
     @RequestMapping("/error")
     public Response<?> error(HttpServletRequest request, HttpServletResponse response) {
         HttpStatus httpStatus = HttpStatus.valueOf(response.getStatus());
+        response.setStatus(HttpStatus.OK.value());
         if (httpStatus.is4xxClientError()) {
             log.info("4xxClientError: {}", httpStatus.getReasonPhrase());
             return Response.fail(httpStatus.getReasonPhrase());
