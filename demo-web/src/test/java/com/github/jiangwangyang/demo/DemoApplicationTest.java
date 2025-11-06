@@ -42,7 +42,7 @@ public class DemoApplicationTest {
     void testException() {
         Response<?> vo = webClient
                 .post()
-                .uri("/exception")
+                .uri("/exception/runtime")
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Response<?>>() {
                 })
