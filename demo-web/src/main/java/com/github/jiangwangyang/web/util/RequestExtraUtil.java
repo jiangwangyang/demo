@@ -41,6 +41,7 @@ public final class RequestExtraUtil {
     }
 
     @Nullable
+    @SuppressWarnings("unchecked")
     public <T> T getExtra(@Nonnull String name) {
         return (T) getExtraMap().get(name);
     }
@@ -50,6 +51,7 @@ public final class RequestExtraUtil {
     }
 
     @Nonnull
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getExtraMap() {
         if (request.getAttribute(EXTRA_ATTRIBUTE_NAME) == null) {
             request.setAttribute(EXTRA_ATTRIBUTE_NAME, new ConcurrentHashMap<>());

@@ -46,6 +46,7 @@ public final class RequestUtil {
      * @return 属性值
      */
     @Nullable
+    @SuppressWarnings("unchecked")
     public static <T> T getAttribute(@Nonnull String name) {
         return (T) getRequest().getAttribute(name);
     }
