@@ -39,27 +39,39 @@ public class DemoApplicationTest {
     }
 
     @Test
-    void testException() {
-        Response<?> vo = webClient
+    void testRuntimeException() {
+        Response<String> vo = webClient
                 .post()
                 .uri("/exception/runtime")
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Response<?>>() {
+                .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.success("", Map.of()));
+        assertThat(vo).isEqualTo(Response.success("runtime exception", Map.of()));
     }
 
     @Test
     void testBusinessException() {
-        Response<?> vo = webClient
+        Response<String> vo = webClient
                 .post()
                 .uri("/exception/business")
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Response<?>>() {
+                .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.fail("", Map.of()));
+        assertThat(vo).isEqualTo(Response.fail("business exception", Map.of()));
+    }
+
+    @Test
+    public void testExecutor() {
+        Response<String> vo = webClient
+                .post()
+                .uri("/executor")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
+                })
+                .block();
+        assertThat(vo).isEqualTo(Response.success("executor", Map.of()));
     }
 
     @Test
