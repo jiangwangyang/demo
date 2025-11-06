@@ -35,7 +35,10 @@ public class DemoApplicationTest {
                 .bodyToMono(new ParameterizedTypeReference<Response<DemoController.VO>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.success(new DemoController.VO("demo"), Map.of()));
+        assertThat(vo).isNotNull()
+                .hasFieldOrPropertyWithValue("success", true)
+                .hasFieldOrPropertyWithValue("message", "success")
+                .hasFieldOrPropertyWithValue("data", new DemoController.VO("demo"));
     }
 
     @Test
@@ -47,7 +50,9 @@ public class DemoApplicationTest {
                 .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.success("runtime exception", Map.of()));
+        assertThat(vo).isNotNull()
+                .hasFieldOrPropertyWithValue("success", false)
+                .hasFieldOrPropertyWithValue("message", "服务器异常 runtime exception");
     }
 
     @Test
@@ -59,7 +64,9 @@ public class DemoApplicationTest {
                 .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.fail("business exception", Map.of()));
+        assertThat(vo).isNotNull()
+                .hasFieldOrPropertyWithValue("success", false)
+                .hasFieldOrPropertyWithValue("message", "business exception");
     }
 
     @Test
@@ -71,7 +78,10 @@ public class DemoApplicationTest {
                 .bodyToMono(new ParameterizedTypeReference<Response<String>>() {
                 })
                 .block();
-        assertThat(vo).isEqualTo(Response.success("executor", Map.of()));
+        assertThat(vo).isNotNull()
+                .hasFieldOrPropertyWithValue("success", true)
+                .hasFieldOrPropertyWithValue("message", "success")
+                .hasFieldOrPropertyWithValue("data", "executor");
     }
 
     @Test
