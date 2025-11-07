@@ -9,10 +9,7 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
@@ -41,36 +38,41 @@ public final class RequestRecordUtil {
         return recordList;
     }
 
-    public static void record(@Nonnull Object object) {
-        record(getRecordList(), getCallerStackTrace(), object);
+    public static void record(@Nonnull String text) {
+        record(getRecordList(), getCallerStackTrace(), text);
     }
 
-    public static void recordRunSync(@Nonnull Runnable runnable) {
-        List<String> recordList = getRecordList();
-        StackTraceElement stackTraceElement = getCallerStackTrace();
-        RecordTask<Void> recordTask = new RecordTask<>(runnable);
-        try {
-            recordTask.run();
-        } finally {
-            record(recordList, stackTraceElement, recordTask.getTaskRecord());
-        }
+    public static void runSync(@Nonnull Runnable runnable) {
+        callSync(Executors.callable(runnable, null));
     }
 
-    public static <U> U recordSupplySync(@Nonnull Supplier<U> supplier) {
+    public static <T> T supplySync(@Nonnull Supplier<T> supplier) {
+        return callSync(supplier::get);
+    }
+
+    public static <V> V callSync(@Nonnull Callable<V> callable) {
         List<String> recordList = getRecordList();
         StackTraceElement stackTraceElement = getCallerStackTrace();
-        RecordTask<U> recordTask = new RecordTask<>(supplier);
+        RecordTask<V> recordTask = new RecordTask<>(callable);
         try {
             return recordTask.get();
         } finally {
-            record(recordList, stackTraceElement, recordTask.getTaskRecord());
+            record(recordList, stackTraceElement, recordTask.getTaskRecord().toString());
         }
     }
 
-    public static CompletableFuture<Void> recordRunAsync(@Nonnull Runnable runnable, @Nonnull Executor executor) {
+    public static CompletableFuture<Void> runAsync(@Nonnull Runnable runnable, @Nonnull Executor executor) {
+        return callAsync(Executors.callable(runnable, null), executor);
+    }
+
+    public static <T> CompletableFuture<T> supplyAsync(@Nonnull Supplier<T> supplier, @Nonnull Executor executor) {
+        return callAsync(supplier::get, executor);
+    }
+
+    public static <V> CompletableFuture<V> callAsync(@Nonnull Callable<V> callable, @Nonnull Executor executor) {
         List<String> recordList = getRecordList();
         StackTraceElement stackTraceElement = getCallerStackTrace();
-        RecordTask<Void> recordTask = new RecordTask<>(runnable);
+        RecordTask<V> recordTask = new RecordTask<>(callable);
         // 记录线程池信息
         if (executor instanceof ThreadPoolExecutor threadPool) {
             record(recordList, stackTraceElement, new ThreadPoolRecord(
@@ -80,52 +82,28 @@ public final class RequestRecordUtil {
                     threadPool.getMaximumPoolSize(),
                     threadPool.getQueue().size(),
                     threadPool.getQueue().remainingCapacity()
-            ));
-        }
-        // 异步执行任务，并在完成后记录结果
-        return CompletableFuture.runAsync(() -> {
-            try {
-                recordTask.run();
-            } finally {
-                record(recordList, stackTraceElement, recordTask.getTaskRecord());
-            }
-        }, executor);
-    }
-
-    public static <U> CompletableFuture<U> recordSupplyAsync(@Nonnull Supplier<U> supplier, @Nonnull Executor executor) {
-        List<String> recordList = getRecordList();
-        StackTraceElement stackTraceElement = getCallerStackTrace();
-        RecordTask<U> recordTask = new RecordTask<>(supplier);
-        // 记录线程池信息
-        if (executor instanceof ThreadPoolExecutor threadPool) {
-            record(recordList, stackTraceElement, new ThreadPoolRecord(
-                    threadPool.getActiveCount(),
-                    threadPool.getPoolSize(),
-                    threadPool.getCorePoolSize(),
-                    threadPool.getMaximumPoolSize(),
-                    threadPool.getQueue().size(),
-                    threadPool.getQueue().remainingCapacity()
-            ));
+            ).toString());
         }
         // 异步执行任务，并在完成后记录结果
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return recordTask.get();
             } finally {
-                record(recordList, stackTraceElement, recordTask.getTaskRecord());
+                record(recordList, stackTraceElement, recordTask.getTaskRecord().toString());
             }
         }, executor);
     }
 
     /**
      * 按照特定格式记录信息
-     * @param recordList 记录列表
-     * @param object     要记录的对象
+     * @param recordList        记录列表
+     * @param stackTraceElement 调用者的栈信息
+     * @param text              要记录的内容
      */
-    private static void record(@Nonnull List<String> recordList, @Nonnull StackTraceElement stackTraceElement, @Nonnull Object object) {
+    private static void record(@Nonnull List<String> recordList, @Nonnull StackTraceElement stackTraceElement, @Nonnull String text) {
         recordList.add(MessageFormat.format(
                 "{0} {1} {2}",
-                LocalDateTime.now(), stackTraceElement, object
+                LocalDateTime.now(), stackTraceElement, text
         ));
     }
 
@@ -156,7 +134,7 @@ public final class RequestRecordUtil {
      * @param queueSize              队列大小
      * @param queueRemainingCapacity 队列剩余容量
      */
-    private record ThreadPoolRecord(
+    public record ThreadPoolRecord(
             Integer activeCount,
             Integer poolSize,
             Integer corePoolSize,

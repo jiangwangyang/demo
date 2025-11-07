@@ -2,7 +2,6 @@ package com.github.jiangwangyang.web.record;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -16,7 +15,6 @@ import java.util.function.Supplier;
  * 包含Runnable、Callable、Supplier
  * @param <T> 任务返回值类型
  */
-@ToString(of = {"executed", "taskRecord"})
 public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
     private final LocalDateTime createTime = LocalDateTime.now();
     private final AtomicBoolean executed = new AtomicBoolean(false);
@@ -77,7 +75,18 @@ public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
         return execute();
     }
 
-    private record TaskRecord<T>(
+    /**
+     * 任务执行信息记录类
+     * @param createTime        创建时间
+     * @param startTime         开始时间
+     * @param endTime           结束时间
+     * @param waitTimeMillis    等待时间 (毫秒)
+     * @param executeTimeMillis 执行时间 (毫秒)
+     * @param result            任务返回值
+     * @param exception         任务异常信息
+     * @param <T>
+     */
+    public record TaskRecord<T>(
             LocalDateTime createTime,
             LocalDateTime startTime,
             LocalDateTime endTime,

@@ -19,7 +19,7 @@ public class ExecutorController {
 
     @RequestMapping
     public Response<?> executor() {
-        String result = RequestRecordUtil.recordSupplyAsync(
+        String result = RequestRecordUtil.supplyAsync(
                 () -> "executor",
                 executorService
         ).join();
