@@ -1,6 +1,7 @@
 package com.github.jiangwangyang.demo;
 
 import com.github.jiangwangyang.demo.controller.DemoController;
+import com.github.jiangwangyang.web.record.RequestRecordUtil;
 import com.github.jiangwangyang.web.response.Response;
 import com.github.jiangwangyang.web.util.ObjectMapperUtil;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,6 +41,10 @@ public class DemoApplicationTest {
                 .hasFieldOrPropertyWithValue("success", true)
                 .hasFieldOrPropertyWithValue("message", "success")
                 .hasFieldOrPropertyWithValue("data", new DemoController.VO("demo"));
+        Optional.ofNullable(vo.getExtra())
+                .map(extra -> (List<String>) extra.get(RequestRecordUtil.RECORD_KEY))
+                .orElse(List.of())
+                .forEach(System.out::println);
     }
 
     @Test
@@ -53,6 +59,10 @@ public class DemoApplicationTest {
         assertThat(vo).isNotNull()
                 .hasFieldOrPropertyWithValue("success", false)
                 .hasFieldOrPropertyWithValue("message", "服务器异常 runtime exception");
+        Optional.ofNullable(vo.getExtra())
+                .map(extra -> (List<String>) extra.get(RequestRecordUtil.RECORD_KEY))
+                .orElse(List.of())
+                .forEach(System.out::println);
     }
 
     @Test
@@ -67,6 +77,10 @@ public class DemoApplicationTest {
         assertThat(vo).isNotNull()
                 .hasFieldOrPropertyWithValue("success", false)
                 .hasFieldOrPropertyWithValue("message", "business exception");
+        Optional.ofNullable(vo.getExtra())
+                .map(extra -> (List<String>) extra.get(RequestRecordUtil.RECORD_KEY))
+                .orElse(List.of())
+                .forEach(System.out::println);
     }
 
     @Test
@@ -82,6 +96,10 @@ public class DemoApplicationTest {
                 .hasFieldOrPropertyWithValue("success", true)
                 .hasFieldOrPropertyWithValue("message", "success")
                 .hasFieldOrPropertyWithValue("data", "executor");
+        Optional.ofNullable(vo.getExtra())
+                .map(extra -> (List<String>) extra.get(RequestRecordUtil.RECORD_KEY))
+                .orElse(List.of())
+                .forEach(System.out::println);
     }
 
     @Test

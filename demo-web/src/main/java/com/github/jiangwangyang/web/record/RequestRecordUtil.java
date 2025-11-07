@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
 /**
@@ -40,13 +41,8 @@ public final class RequestRecordUtil {
         return recordList;
     }
 
-    public static void record(@Nonnull String text) {
-        List<String> recordList = getRecordList();
-        StackTraceElement stackTraceElement = getCallerStackTrace();
-        recordList.add(MessageFormat.format(
-                "{0} {1} {2}",
-                LocalDateTime.now(), stackTraceElement, text
-        ));
+    public static void record(@Nonnull Object object) {
+        record(getRecordList(), getCallerStackTrace(), object);
     }
 
     public static void recordRunSync(@Nonnull Runnable runnable) {
@@ -56,10 +52,7 @@ public final class RequestRecordUtil {
         try {
             recordTask.run();
         } finally {
-            recordList.add(MessageFormat.format(
-                    "{0} {1} {2}",
-                    LocalDateTime.now(), stackTraceElement, recordTask
-            ));
+            record(recordList, stackTraceElement, recordTask);
         }
     }
 
@@ -70,10 +63,7 @@ public final class RequestRecordUtil {
         try {
             return recordTask.get();
         } finally {
-            recordList.add(MessageFormat.format(
-                    "{0} {1} {2}",
-                    LocalDateTime.now(), stackTraceElement, recordTask
-            ));
+            record(recordList, stackTraceElement, recordTask);
         }
     }
 
@@ -81,14 +71,23 @@ public final class RequestRecordUtil {
         List<String> recordList = getRecordList();
         StackTraceElement stackTraceElement = getCallerStackTrace();
         RecordTask<Void> recordTask = new RecordTask<>(runnable);
+        // 记录线程池信息
+        if (executor instanceof ThreadPoolExecutor threadPool) {
+            record(recordList, stackTraceElement, new ThreadPoolRecord(
+                    threadPool.getActiveCount(),
+                    threadPool.getPoolSize(),
+                    threadPool.getCorePoolSize(),
+                    threadPool.getMaximumPoolSize(),
+                    threadPool.getQueue().size(),
+                    threadPool.getQueue().remainingCapacity()
+            ));
+        }
+        // 异步执行任务，并在完成后记录结果
         return CompletableFuture.runAsync(() -> {
             try {
                 recordTask.run();
             } finally {
-                recordList.add(MessageFormat.format(
-                        "{0} {1} {2}",
-                        LocalDateTime.now(), stackTraceElement, recordTask
-                ));
+                record(recordList, stackTraceElement, recordTask);
             }
         }, executor);
     }
@@ -97,22 +96,44 @@ public final class RequestRecordUtil {
         List<String> recordList = getRecordList();
         StackTraceElement stackTraceElement = getCallerStackTrace();
         RecordTask<U> recordTask = new RecordTask<>(supplier);
+        // 记录线程池信息
+        if (executor instanceof ThreadPoolExecutor threadPool) {
+            record(recordList, stackTraceElement, new ThreadPoolRecord(
+                    threadPool.getActiveCount(),
+                    threadPool.getPoolSize(),
+                    threadPool.getCorePoolSize(),
+                    threadPool.getMaximumPoolSize(),
+                    threadPool.getQueue().size(),
+                    threadPool.getQueue().remainingCapacity()
+            ));
+        }
+        // 异步执行任务，并在完成后记录结果
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return recordTask.get();
             } finally {
-                recordList.add(MessageFormat.format(
-                        "{0} {1} {2}",
-                        LocalDateTime.now(), stackTraceElement, recordTask
-                ));
+                record(recordList, stackTraceElement, recordTask);
             }
         }, executor);
+    }
+
+    /**
+     * 按照特定格式记录信息
+     * @param recordList 记录列表
+     * @param object     要记录的对象
+     */
+    private static void record(@Nonnull List<String> recordList, @Nonnull StackTraceElement stackTraceElement, @Nonnull Object object) {
+        recordList.add(MessageFormat.format(
+                "{0} {1} {2}",
+                LocalDateTime.now(), stackTraceElement, object
+        ));
     }
 
     /**
      * 获取调用者的栈信息 从栈中找到第一个不是当前工具类的调用者
      * @return 调用者的栈信息
      */
+    @Nonnull
     private static StackTraceElement getCallerStackTrace() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement stackTraceElement : stackTrace) {
@@ -124,5 +145,24 @@ public final class RequestRecordUtil {
             }
         }
         return stackTrace[stackTrace.length - 1];
+    }
+
+    /**
+     * 线程池记录信息
+     * @param activeCount            活跃线程数
+     * @param poolSize               当前线程池大小
+     * @param corePoolSize           核心线程数
+     * @param maxPoolSize            最大线程数
+     * @param queueSize              队列大小
+     * @param queueRemainingCapacity 队列剩余容量
+     */
+    private record ThreadPoolRecord(
+            Integer activeCount,
+            Integer poolSize,
+            Integer corePoolSize,
+            Integer maxPoolSize,
+            Integer queueSize,
+            Integer queueRemainingCapacity
+    ) {
     }
 }

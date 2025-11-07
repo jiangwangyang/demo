@@ -65,7 +65,7 @@ public class ControllerRecordAspect {
     @Before("controllerPointcut() || restControllerPointcut()")
     public void before(JoinPoint joinPoint) {
         RequestRecordUtil.record(MessageFormat.format(
-                "Controller {0} {1} {2}",
+                "{0} {1} {2}",
                 RequestUtil.getRequest().getMethod(), RequestUtil.getRequest().getRequestURI(), Arrays.stream(joinPoint.getArgs())
                         .map(arg -> {
                             if (arg == null) {
