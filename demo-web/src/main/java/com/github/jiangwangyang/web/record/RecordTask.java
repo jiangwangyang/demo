@@ -2,10 +2,13 @@ package com.github.jiangwangyang.web.record;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -13,17 +16,16 @@ import java.util.function.Supplier;
  * 包含Runnable、Callable、Supplier
  * @param <T> 任务返回值类型
  */
+@ToString(of = {"executed", "taskRecord"})
 public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
-    private final Callable<T> task;
     private final LocalDateTime createTime = LocalDateTime.now();
+    private final AtomicBoolean executed = new AtomicBoolean(false);
+    private final Callable<T> task;
     @Getter
     private volatile TaskRecord<T> taskRecord;
 
     public RecordTask(Runnable task) {
-        this.task = () -> {
-            task.run();
-            return null;
-        };
+        this.task = Executors.callable(task, null);
     }
 
     public RecordTask(Callable<T> task) {
@@ -40,8 +42,8 @@ public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
      */
     @SneakyThrows
     public T execute() {
-        if (taskRecord != null) {
-            throw new IllegalStateException("任务不可多次执行");
+        if (!executed.compareAndSet(false, true)) {
+            throw new IllegalStateException("RecordTask不可多次执行");
         }
         LocalDateTime startTime = LocalDateTime.now();
         T result = null;
