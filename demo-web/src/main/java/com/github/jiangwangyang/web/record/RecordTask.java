@@ -2,7 +2,6 @@ package com.github.jiangwangyang.web.record;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,23 +13,11 @@ import java.util.function.Supplier;
  * 包含Runnable、Callable、Supplier
  * @param <T> 任务返回值类型
  */
-@ToString(exclude = {"task"})
 public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
     private final Callable<T> task;
-    @Getter
     private final LocalDateTime createTime = LocalDateTime.now();
     @Getter
-    private volatile LocalDateTime startTime;
-    @Getter
-    private volatile LocalDateTime endTime;
-    @Getter
-    private volatile Long waitTimeMillis;
-    @Getter
-    private volatile Long executeTimeMillis;
-    @Getter
-    private volatile T result;
-    @Getter
-    private volatile Exception exception;
+    private volatile TaskRecord<T> taskRecord;
 
     public RecordTask(Runnable task) {
         this.task = () -> {
@@ -53,10 +40,12 @@ public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
      */
     @SneakyThrows
     public T execute() {
-        if (startTime != null) {
+        if (taskRecord != null) {
             throw new IllegalStateException("任务不可多次执行");
         }
-        startTime = LocalDateTime.now();
+        LocalDateTime startTime = LocalDateTime.now();
+        T result = null;
+        Exception exception = null;
         try {
             result = task.call();
             return result;
@@ -64,9 +53,10 @@ public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
             exception = e;
             throw e;
         } finally {
-            endTime = LocalDateTime.now();
-            waitTimeMillis = startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - createTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            executeTimeMillis = endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            LocalDateTime endTime = LocalDateTime.now();
+            long waitTimeMillis = startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - createTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long executeTimeMillis = endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            taskRecord = new TaskRecord<>(createTime, startTime, endTime, waitTimeMillis, executeTimeMillis, result, exception);
         }
     }
 
@@ -83,5 +73,16 @@ public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
     @Override
     public T get() {
         return execute();
+    }
+
+    private record TaskRecord<T>(
+            LocalDateTime createTime,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            Long waitTimeMillis,
+            Long executeTimeMillis,
+            T result,
+            Exception exception
+    ) {
     }
 }

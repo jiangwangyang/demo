@@ -52,7 +52,7 @@ public final class RequestRecordUtil {
         try {
             recordTask.run();
         } finally {
-            record(recordList, stackTraceElement, recordTask);
+            record(recordList, stackTraceElement, recordTask.getTaskRecord());
         }
     }
 
@@ -63,7 +63,7 @@ public final class RequestRecordUtil {
         try {
             return recordTask.get();
         } finally {
-            record(recordList, stackTraceElement, recordTask);
+            record(recordList, stackTraceElement, recordTask.getTaskRecord());
         }
     }
 
@@ -87,7 +87,7 @@ public final class RequestRecordUtil {
             try {
                 recordTask.run();
             } finally {
-                record(recordList, stackTraceElement, recordTask);
+                record(recordList, stackTraceElement, recordTask.getTaskRecord());
             }
         }, executor);
     }
@@ -112,7 +112,7 @@ public final class RequestRecordUtil {
             try {
                 return recordTask.get();
             } finally {
-                record(recordList, stackTraceElement, recordTask);
+                record(recordList, stackTraceElement, recordTask.getTaskRecord());
             }
         }, executor);
     }
