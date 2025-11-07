@@ -5,6 +5,7 @@ import com.github.jiangwangyang.web.exception.GlobalExceptionHandler;
 import com.github.jiangwangyang.web.record.RecordAspect;
 import com.github.jiangwangyang.web.record.RecordResponseBodyAdvice;
 import com.github.jiangwangyang.web.util.ObjectMapperUtil;
+import com.github.jiangwangyang.web.util.ResponseWriteUtil;
 import com.github.jiangwangyang.web.util.SpringContextUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Import;
         RecordAspect.class,
         RecordResponseBodyAdvice.class,
         ObjectMapperUtil.class,
+        ResponseWriteUtil.class,
         SpringContextUtil.class
 })
 public class ImportConfig {

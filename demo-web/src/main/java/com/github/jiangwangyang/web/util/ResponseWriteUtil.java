@@ -1,7 +1,11 @@
 package com.github.jiangwangyang.web.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import lombok.SneakyThrows;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.util.StringUtils;
@@ -13,17 +17,18 @@ import java.util.Optional;
 
 /**
  * HttpServletResponse写入工具类
+ * 注入Spring容器后会使用容器中的ObjectMapper 否则使用默认的ObjectMapper
  * 注意：该工具只负责写入响应数据，调用者需要自己设置状态码和响应头
  * 注意：该工具类是同步阻塞的，请勿在非阻塞线程中调用
  * 注意：该工具类忽略了IO异常，调用者需要自己处理异常
  * 注意：必须在Spring请求线程中调用，否则会抛出异常
  */
-public final class ResponseWriteUtil {
-    private ResponseWriteUtil() {
-    }
+public final class ResponseWriteUtil implements ApplicationContextAware {
 
-    @SneakyThrows
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     @Nonnull
+    @SneakyThrows
     private static PrintWriter getWriter() {
         return Optional.ofNullable(RequestUtil.getResponse().getWriter())
                 .orElseThrow();
@@ -36,6 +41,7 @@ public final class ResponseWriteUtil {
      * @see ServerSentEventHttpMessageWriter
      */
     @Nonnull
+    @SneakyThrows
     private static String encodeSse(@Nonnull Object data) {
         ServerSentEvent<?> sse = data instanceof ServerSentEvent<?> _sse ? _sse : ServerSentEvent.builder(data).build();
         StringBuilder sb = new StringBuilder();
@@ -60,7 +66,7 @@ public final class ResponseWriteUtil {
         } else if (sse.data() instanceof String text) {
             return sseText + StringUtils.replace(text, "\n", "\ndata:") + "\n\n";
         } else {
-            return sseText + ObjectMapperUtil.writeValueAsString(sse.data()) + "\n\n";
+            return sseText + objectMapper.writeValueAsString(sse.data()) + "\n\n";
         }
     }
 
@@ -105,5 +111,10 @@ public final class ResponseWriteUtil {
                 .map(ResponseWriteUtil::encodeSse)
                 .doOnNext(writer::write)
                 .blockLast();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        objectMapper = applicationContext.getBean(ObjectMapper.class);
     }
 }

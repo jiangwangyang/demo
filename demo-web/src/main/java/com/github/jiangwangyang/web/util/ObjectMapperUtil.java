@@ -10,13 +10,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * ObjectMapper 工具类
- * 需要注入Spring容器从而初始化ObjectMapper
+ * ObjectMapper工具类
+ * 注入Spring容器后会使用容器中的ObjectMapper 否则使用默认的ObjectMapper
  */
 public final class ObjectMapperUtil implements ApplicationContextAware {
 
     @Getter
-    private static ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @SneakyThrows
     public static String writeValueAsString(Object object) {
@@ -40,6 +40,6 @@ public final class ObjectMapperUtil implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        ObjectMapperUtil.objectMapper = applicationContext.getBean(ObjectMapper.class);
+        objectMapper = applicationContext.getBean(ObjectMapper.class);
     }
 }
