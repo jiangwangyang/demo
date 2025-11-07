@@ -1,5 +1,6 @@
 package com.github.jiangwangyang.demo.controller;
 
+import com.github.jiangwangyang.web.record.Recordable;
 import com.github.jiangwangyang.web.response.Response;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/demo")
+@Recordable
 public class DemoController {
 
     @RequestMapping
