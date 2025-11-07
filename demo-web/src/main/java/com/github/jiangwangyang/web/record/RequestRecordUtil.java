@@ -1,8 +1,9 @@
 package com.github.jiangwangyang.web.record;
 
 import jakarta.annotation.Nonnull;
-import org.springframework.web.context.request.RequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import java.util.function.Supplier;
  * 注意：必须在Spring请求线程中调用，否则会抛出异常
  * @see RequestContextHolder
  */
-public class RequestRecordUtil {
+public final class RequestRecordUtil {
     public static final String RECORD_KEY = "record";
 
     private RequestRecordUtil() {
@@ -27,13 +28,14 @@ public class RequestRecordUtil {
     @Nonnull
     @SuppressWarnings("unchecked")
     public static List<String> getRecordList() {
-        RequestAttributes requestAttributes = Optional
-                .ofNullable(RequestContextHolder.getRequestAttributes())
+        HttpServletRequest request = Optional
+                .ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .map(ServletRequestAttributes::getRequest)
                 .orElseThrow();
-        List<String> recordList = (List<String>) requestAttributes.getAttribute(RECORD_KEY, RequestAttributes.SCOPE_REQUEST);
+        List<String> recordList = (List<String>) request.getAttribute(RECORD_KEY);
         if (recordList == null) {
             recordList = new CopyOnWriteArrayList<>();
-            requestAttributes.setAttribute(RECORD_KEY, recordList, RequestAttributes.SCOPE_REQUEST);
+            request.setAttribute(RECORD_KEY, recordList);
         }
         return recordList;
     }

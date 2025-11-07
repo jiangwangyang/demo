@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @param <T> 任务返回值类型
  */
 @ToString(exclude = {"task"})
-public final class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
+public class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
     private final Callable<T> task;
     @Getter
     private final LocalDateTime createTime = LocalDateTime.now();
