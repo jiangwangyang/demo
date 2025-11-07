@@ -1,73 +1,87 @@
 package com.github.jiangwangyang.web.record;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 
-import java.text.MessageFormat;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
  * 创建任务执行器，用于执行任务并记录任务执行时间
  * 包含Runnable、Callable、Supplier
- * 注意：recordMap需要是线程安全的集合
- * 注意：taskName必须是全局唯一的
  * @param <T> 任务返回值类型
  */
-public final class RecordTask<T> {
-    private final Map<String, Object> recordMap;
-    private final String taskName;
-    private final Supplier<T> task;
-    private final long createTimeMillis = System.currentTimeMillis();
+@ToString(exclude = {"task"})
+public final class RecordTask<T> implements Runnable, Callable<T>, Supplier<T> {
+    private final Callable<T> task;
+    @Getter
+    private final LocalDateTime createTime = LocalDateTime.now();
+    @Getter
+    private volatile LocalDateTime startTime;
+    @Getter
+    private volatile LocalDateTime endTime;
+    @Getter
+    private volatile Long waitTimeMillis;
+    @Getter
+    private volatile Long executeTimeMillis;
+    @Getter
+    private volatile T result;
+    @Getter
+    private volatile Exception exception;
 
-    private RecordTask(Map<String, Object> recordMap, String taskName, Supplier<T> task) {
-        this.recordMap = recordMap;
-        this.taskName = taskName;
+    public RecordTask(Runnable task) {
+        this.task = () -> {
+            task.run();
+            return null;
+        };
+    }
+
+    public RecordTask(Callable<T> task) {
         this.task = task;
     }
 
-    public static Runnable ofRunnable(Map<String, Object> recordMap, String taskName, Runnable task) {
-        RecordTask<Void> recordTask = new RecordTask<>(recordMap, taskName, () -> {
-            task.run();
-            return null;
-        });
-        return recordTask::execute;
+    public RecordTask(Supplier<T> task) {
+        this.task = task::get;
     }
 
-    public static <T> Callable<T> ofCallable(Map<String, Object> recordMap, String taskName, Callable<T> task) {
-        RecordTask<T> recordTask = new RecordTask<>(recordMap, taskName, new Supplier<>() {
-            @SneakyThrows
-            @Override
-            public T get() {
-                return task.call();
-            }
-        });
-        return recordTask::execute;
-    }
-
-    public static <T> Supplier<T> ofSupplier(Map<String, Object> recordMap, String taskName, Supplier<T> task) {
-        RecordTask<T> recordTask = new RecordTask<>(recordMap, taskName, task);
-        return recordTask::execute;
-    }
-
-    @SuppressWarnings("unchecked")
+    /**
+     * 执行任务并记录任务执行时间
+     * @return 任务返回值
+     */
+    @SneakyThrows
     public T execute() {
-        long startTimeMillis = System.currentTimeMillis();
-        Object result = null;
+        if (startTime != null) {
+            throw new IllegalStateException("任务不可多次执行");
+        }
+        startTime = LocalDateTime.now();
         try {
-            result = task.get();
-            return (T) result;
+            result = task.call();
+            return result;
         } catch (Exception e) {
-            result = e;
+            exception = e;
             throw e;
         } finally {
-            long endTimeMillis = System.currentTimeMillis();
-            long waitTimeMillis = startTimeMillis - createTimeMillis;
-            long executeTimeMillis = endTimeMillis - startTimeMillis;
-            recordMap.put(taskName, MessageFormat.format(
-                    "execute_time: {0}, wait_time: {1}, create_time: {2}, start_time: {3}, end_time: {4}, result: {5}",
-                    executeTimeMillis, waitTimeMillis, createTimeMillis, startTimeMillis, endTimeMillis, result
-            ));
+            endTime = LocalDateTime.now();
+            waitTimeMillis = startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - createTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            executeTimeMillis = endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
+    }
+
+    @Override
+    public void run() {
+        execute();
+    }
+
+    @Override
+    public T call() {
+        return execute();
+    }
+
+    @Override
+    public T get() {
+        return execute();
     }
 }

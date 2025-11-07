@@ -1,6 +1,7 @@
 package com.github.jiangwangyang.web.record;
 
-import com.github.jiangwangyang.web.util.RequestExtraUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jiangwangyang.web.util.RequestUtil;
 import lombok.SneakyThrows;
 import org.aspectj.lang.JoinPoint;
@@ -9,11 +10,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -29,6 +33,10 @@ public class ControllerRecordAspect {
     public static final String RECORD_REQUEST_URI_KEY = "request_uri";
     public static final String RECORD_CONTROLLER_PARAMS_KEY = "controller_params";
     public static final String RECORD_CONTROLLER_EXECUTE_TIME_KEY = "controller_execute_time";
+    private static final Logger log = LoggerFactory.getLogger(ControllerRecordAspect.class);
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 切入点：匹配所有被 @Controller注解的类中的所有方法
@@ -56,10 +64,21 @@ public class ControllerRecordAspect {
      */
     @Before("controllerPointcut() || restControllerPointcut()")
     public void before(JoinPoint joinPoint) {
-        Map<String, Object> recordMap = RequestExtraUtil.of().getExtraMap();
-        recordMap.put(RECORD_REQUEST_METHOD_KEY, RequestUtil.getRequest().getMethod());
-        recordMap.put(RECORD_REQUEST_URI_KEY, RequestUtil.getRequest().getRequestURI());
-        recordMap.put(RECORD_CONTROLLER_PARAMS_KEY, Arrays.stream(joinPoint.getArgs()).toList().toString());
+        RequestRecordUtil.record(MessageFormat.format(
+                "Controller {0} {1} {2}",
+                RequestUtil.getRequest().getMethod(), RequestUtil.getRequest().getRequestURI(), Arrays.stream(joinPoint.getArgs())
+                        .map(arg -> {
+                            if (arg == null) {
+                                return null;
+                            }
+                            try {
+                                return objectMapper.writeValueAsString(arg);
+                            } catch (JsonProcessingException e) {
+                                return arg.toString();
+                            }
+                        })
+                        .toList()
+        ));
     }
 
     /**
@@ -70,16 +89,12 @@ public class ControllerRecordAspect {
      */
     @Around("controllerPointcut() || restControllerPointcut()")
     public Object around(ProceedingJoinPoint proceedingJoinPoint) {
-        return RecordTask.ofSupplier(
-                RequestExtraUtil.of().getExtraMap(),
-                RECORD_CONTROLLER_EXECUTE_TIME_KEY,
-                new Supplier<>() {
-                    @SneakyThrows
-                    @Override
-                    public Object get() {
-                        return proceedingJoinPoint.proceed();
-                    }
-                }
-        ).get();
+        return RequestRecordUtil.recordSupplySync(new Supplier<>() {
+            @SneakyThrows
+            @Override
+            public Object get() {
+                return proceedingJoinPoint.proceed();
+            }
+        });
     }
 }

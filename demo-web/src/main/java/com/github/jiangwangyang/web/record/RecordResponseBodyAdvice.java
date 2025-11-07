@@ -1,6 +1,6 @@
-package com.github.jiangwangyang.web.response;
+package com.github.jiangwangyang.web.record;
 
-import com.github.jiangwangyang.web.util.RequestExtraUtil;
+import com.github.jiangwangyang.web.response.Response;
 import com.github.jiangwangyang.web.util.RequestUtil;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.Map;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 响应体增强器
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 @ControllerAdvice
 @Slf4j
-public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> {
+public class RecordResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> {
     @Override
     public boolean supports(@Nonnull MethodParameter returnType, @Nonnull Class<? extends HttpMessageConverter<?>> converterType) {
         return Response.class.isAssignableFrom(returnType.getParameterType());
@@ -32,12 +33,14 @@ public class ExtraResponseBodyAdvice implements ResponseBodyAdvice<Response<?>> 
         if (body == null) {
             return null;
         }
-        Map<String, Object> extraMap = RequestExtraUtil.of().getExtraMap();
-        if (body.getExtra() != null) {
-            extraMap.putAll(body.getExtra());
+        List<String> recordList = RequestRecordUtil.getRecordList();
+        if (!recordList.isEmpty()) {
+            if (body.getExtra() == null) {
+                body.setExtra(new ConcurrentHashMap<>());
+            }
+            body.getExtra().put(RequestRecordUtil.RECORD_KEY, recordList);
+            log.info("{} {} {}", RequestUtil.getRequest().getMethod(), RequestUtil.getRequest().getRequestURI(), recordList);
         }
-        body.setExtra(extraMap);
-        log.info("{} {} {}", RequestUtil.getRequest().getMethod(), RequestUtil.getRequest().getRequestURI(), extraMap);
         return body;
     }
 }
